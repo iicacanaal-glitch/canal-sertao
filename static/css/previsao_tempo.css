@@ -1,0 +1,30 @@
+.card-previsao {
+    border-radius: 12px;
+    transition: transform 0.2s;
+}
+
+.card-previsao:hover {
+    transform: scale(1.05);
+}
+
+.card-previsao img {
+    width: 60px;
+}
+
+.card-previsao .temp {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.card-previsao .chuva {
+    font-size: 12px;
+    color: #555;
+}
+
+.mapa-card {
+    border-radius: 12px;
+}
+
+.grafico-card {
+    border-radius: 12px;
+}

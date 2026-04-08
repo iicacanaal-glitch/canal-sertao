@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Título -->
+    <div class="card-custom mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-1">🗺️ Mapa do Canal do Sertão</h3>
+                <small class="text-muted">
+                    Visualização dos trechos do canal
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="card-custom">
+        <div id="map" style="height: 75vh; border-radius: 10px;"></div>
+    </div>
+
+</div>
+
+<script>
+    const geojsonUrl = "{% static 'geojson/canal_trechos.geojson' %}";
+</script>
+
+<script src="{% static 'js/mapa_canal.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Irrigantes</h2>
+
+    <a href="{% url 'novo_irrigante' %}" class="btn btn-primary mb-3">
+        Novo Irrigante
+    </a>
+
+    <table class="table table-striped table-bordered">
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Município</th>
+            <th>Telefone</th>
+            <th>Área irrigada</th>
+        </tr>
+
+        {% for irrigante in irrigantes %}
+        <tr>
+            <td>{{ irrigante.nome }}</td>
+            <td>{{ irrigante.cpf }}</td>
+            <td>{{ irrigante.municipio }}</td>
+            <td>{{ irrigante.telefone }}</td>
+            <td>{{ irrigante.area_irrigada }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

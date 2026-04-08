@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<div class="container mt-4">
+    <h2>Novo Irrigante</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ERROS GERAIS -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- ================= DADOS PESSOAIS ================= -->
+        <h4 class="mt-4">Dados Pessoais</h4>
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label required-label">Nome</label>
+                {{ form.nome }}
+                <div class="error-text">{{ form.nome.errors }}</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Apelido</label>
+                {{ form.apelido }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label required-label">CPF</label>
+                {{ form.cpf }}
+                <div class="error-text">{{ form.cpf.errors }}</div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">RG</label>
+                {{ form.rg }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label required-label">Estado Civil</label>
+                {{ form.estado_civil }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label required-label">Data Nascimento</label>
+                {{ form.data_nascimento }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label required-label">Nome da Mãe</label>
+                {{ form.nome_mae }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label required-label">Telefone</label>
+                {{ form.telefone }}
+            </div>
+
+        </div>
+
+        <!-- ================= CONJUGE ================= -->
+        <h4 class="mt-4">Dados do Cônjuge</h4>
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nome do Cônjuge</label>
+                {{ form.conjuge }}
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label class="form-label">CPF</label>
+                {{ form.cpf_conjuge }}
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label class="form-label">RG</label>
+                {{ form.rg_conjuge }}
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label class="form-label">Estado Civil</label>
+                {{ form.estado_civil_conjuge }}
+            </div>
+
+        </div>
+
+        <!-- ================= LOCALIZAÇÃO ================= -->
+        <h4 class="mt-4">Localização</h4>
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label required-label">Município</label>
+                {{ form.municipio }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Latitude</label>
+                {{ form.latitude }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Longitude</label>
+                {{ form.longitude }}
+            </div>
+
+        </div>
+
+        <!-- ================= IMÓVEL ================= -->
+        <h4 class="mt-4">Imóvel</h4>
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label required-label">Nome do Imóvel</label>
+                {{ form.nome_imovel }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Comunidade</label>
+                {{ form.comunidade }}
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Finalidade</label>
+                {{ form.finalidade }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Área Total</label>
+                {{ form.area_total }}
+
+                {% if form.area_total.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.area_total.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Área Irrigada</label>
+                {{ form.area_irrigada }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Forma de Ocupação</label>
+                {{ form.forma_ocupacao }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Permissão de Uso</label>
+                {{ form.permissao_de_uso }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Nº Permissão</label>
+                {{ form.num_permissao }}
+            </div>
+
+        </div>
+
+        <!-- ================= USO ================= -->
+        <h4 class="mt-4">Tipo de Uso</h4>
+        <div class="row">
+
+            <div class="col-md-2 form-check">
+                {{ form.uso_individual }}
+                <label class="form-check-label">Uso Individual</label>
+            </div>
+
+            <div class="col-md-2 form-check">
+                {{ form.uso_coletivo }}
+                <label class="form-check-label">Uso Coletivo</label>
+            </div>
+
+            <div class="col-md-3" id="div_quant_coletivo">
+                <label>Quantidade no uso coletivo</label>
+                {{ form.quant_coletivo }}
+
+                {% if form.quant_coletivo.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.quant_coletivo.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- ================= CAPTAÇÃO ================= -->
+        <h4 class="mt-4">Captação</h4>
+        <div class="row">
+
+            <div class="col-md-3 mb-3">
+                <label>Nº Lacre</label>
+                {{ form.num_lacre }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Trecho Captação</label>
+                {{ form.trecho_captacao }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Vazão requerida</label>
+                {{ form.vazao_requerida }}
+
+                {% if form.vazao_requerida.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.vazao_requerida.help_text }}
+                    </small>
+                {% endif %}
+
+                {% if form.vazao_requerida.errors %}
+                    <div class="error-text">
+                        {{ form.vazao_requerida.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Potência bomba</label>
+                {{ form.potencia_bomba }}
+
+                {% if form.potencia_bomba.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.potencia_bomba.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Dias Uso/Semana</label>
+                {{ form.dias_uso_por_semana }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Diâmetro Sucção</label>
+                {{ form.diametro_succao }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Diâmetro Recalque</label>
+                {{ form.diametro_recalque }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Energia Utilizada</label>
+                {{ form.energia_utilizada }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Vazão Bombeamento</label>
+                {{ form.vazao_bombeamento }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Distância Captação</label>
+                {{ form.distancia_captacao_destinacao }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Altura Recalque</label>
+                {{ form.altura_recalque }}
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Destinação após captação</label>
+                {{ form.destinacao_apos_captacao }}
+            </div>
+
+        </div>
+
+        <!-- ================= RESERVATÓRIO ================= -->
+        <h4 class="mt-4">Reservatório</h4>
+        <div class="row">
+
+            <div class="col-md-2 form-check">
+                {{ form.uso_direto }}
+                <label class="form-check-label">Uso Direto</label>
+            </div>
+
+            <div class="col-md-2 form-check">
+                {{ form.uso_reservatorio }}
+                <label class="form-check-label">Reservatório</label>
+            </div>
+
+            <div class="col-md-3" id="div_vol_reservatorio">
+                <label>Volume do Reservatório</label>
+                {{ form.vol_reservatorio }}
+
+                {% if form.vol_reservatorio.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.vol_reservatorio.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- ================= ARQUIVO ================= -->
+        <h4 class="mt-4">Documento</h4>
+        <div class="mb-3">
+            <label>Termo de Autorização SEMARH</label>
+            {{ form.termo_autorizacao_semarh }}
+        </div>
+
+        <button class="btn btn-success">Salvar</button>
+        <a href="{% url 'lista_irrigantes' %}" class="btn btn-secondary">Voltar</a>
+
+    </form>
+</div>
+
+<script src="{% static 'js/forms.js' %}"></script>
+{% endblock %}

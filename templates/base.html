@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sala de Situação - Canal do Sertão</title>
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+<!-- HEADER INSTITUCIONAL -->
+<div class="header-institucional">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+
+        <!-- Logos -->
+        <div class="d-flex align-items-center">
+            <img src="{% static 'img/governo.png' %}" height="100" class="me-4">
+        </div>
+
+        <!-- Título -->
+        <div class="titulo-sistema text-center">
+            <a class="navbar-brand align-items-center" href="{% url 'home' %}">
+                Sala de Situação do Canal do Sertão Alagoano
+            </a>
+        </div>
+
+        <!-- Espaço vazio para centralizar -->
+        <div style="width:200px;"></div>
+
+    </div>
+</div>
+
+<!-- BARRA DO USUÁRIO -->
+<div class="navbar-custom d-flex justify-content-between align-items-center">
+    <div>
+        <a class="navbar-brand align-items-center" href="{% url 'home' %}">
+            <span><strong>Sistema de Monitoramento e Gestão</strong></span>
+        </a>
+    </div>
+
+    <div>
+        {% if user.is_authenticated %}
+            <span class="badge bg-success badge-usuario me-2">
+                {{ user.get_full_name|default:user.username }}
+            </span>
+
+            <span class="badge bg-warning text-dark badge-usuario me-2">
+                {{ user.get_grupo_display }}
+            </span>
+
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light btn-sm">Sair</button>
+            </form>
+
+        {% else %}
+            <a href="{% url 'login' %}"><strong>Login</strong></a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- MENU PRINCIPAL -->
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+
+        <!-- Botão mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-center" id="navbarMenu">
+            <ul class="navbar-nav">
+
+                <!-- Clima -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Clima</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'previsao_tempo' %}">Previsão do tempo</a></li>
+                        <li><a class="dropdown-item" href="#">Chuvas</a></li>
+                    </ul>
+                </li>
+
+                <!-- Informações -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Informações</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Histórico da Obra</a></li>
+                        <li><a class="dropdown-item" href="#">Arcabouço Legal</a></li>
+                        <li><a class="dropdown-item" href="#">Investimento</a></li>
+                        <li><a class="dropdown-item" href="#">ODS</a></li>
+                    </ul>
+                </li>
+
+                <!-- Estatísticas -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Estatísticas</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Volumes</a></li>
+                        <li><a class="dropdown-item" href="#">Energia</a></li>
+                        <li><a class="dropdown-item" href="#">Financeiro</a></li>
+                        <li><a class="dropdown-item" href="#">Municípios</a></li>
+                        <li><a class="dropdown-item" href="#">Indicadores</a></li>
+                        <li><a class="dropdown-item" href="#">Paradas</a></li>
+                    </ul>
+                </li>
+
+                <!-- Irrigantes -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Cadastro de Irrigantes</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'lista_irrigantes' %}">Listar Irrigantes</a></li>
+                        <li><a class="dropdown-item" href="{% url 'novo_irrigante' %}">Cadastrar Irrigantes</a></li>
+                    </ul>
+                </li>
+
+                <!-- Mapeamento -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Mapeamento</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'mapa_canal' %}">Mapa do canal</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mapa_solos' %}">Mapeamento de Solo</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mapa_culturas' %}">Mapeamento de Culturas</a></li>
+                    </ul>
+                </li>
+
+                <!-- Paradas -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Paradas</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'lista_paradas' %}">Listar Paradas</a></li>
+                        <li><a class="dropdown-item" href="{% url 'nova_parada' %}">Cadastrar Paradas</a></li>
+                    </ul>
+                </li>
+
+                <!-- Ativos -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Ativos</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Equipamentos</a></li>
+                        <li><a class="dropdown-item" href="#">Manutenções</a></li>
+                    </ul>
+                </li>
+
+                <!-- CCO -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">CCO</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Distribuição</a></li>
+                        <li><a class="dropdown-item" href="#">Captação</a></li>
+                        <li><a class="dropdown-item" href="#">Produção</a></li>
+                    </ul>
+                </li>
+
+                <!-- Repositório -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#">Repositório</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'lista_documentos' %}">Documentos</a></li>
+                        <li><a class="dropdown-item" href="#">Projetos</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<!-- CONTEÚDO -->
+<div class="container-main">
+    {% block content %}
+    {% endblock %}
+</div>
+
+
+<!-- FOOTER -->
+<footer class="footer-institucional">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <!-- Logo IICA -->
+            <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
+                <div class="logo-box">
+                    <img src="{% static 'img/iica.png' %}" alt="IICA">
+                </div>
+            </div>
+
+            <!-- Texto central -->
+            <div class="col-md-6 text-center footer-texto">
+                <strong>Sistema de Monitoramento do Canal do Sertão</strong><br>
+                Desenvolvido por HIDROBR Consultoria Ltda e PHA Data Mind<br>
+                © {% now "Y" %} - Todos os direitos reservados
+                <div class="logo-box">
+                    <img src="{% static 'img/hidro-pha.png' %}" alt="Hidro-PHA">
+                </div>
+            </div>
+
+            <!-- Logos direita -->
+            <div class="col-md-3 text-center text-md-end">
+                <div class="logos-direita">
+                    <div class="logo-box">
+                        <img src="{% static 'img/caf.png' %}" alt="CAF">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+</body>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

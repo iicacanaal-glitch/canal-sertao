@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card-custom text-center">
+
+        <h3 class="text-danger mb-3">⚠️ Confirmar Exclusão</h3>
+
+        <p>
+            Tem certeza que deseja excluir o documento:
+        </p>
+
+        <h5 class="mb-4">
+            "{{ objeto.titulo }}"
+        </h5>
+        <p><strong>Categoria:</strong> {{ objeto.categoria }}</p>
+        <p><strong>Data:</strong> {{ objeto.data_upload|date:"d/m/Y" }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger me-2">
+                🗑 Sim, excluir
+            </button>
+
+            <a href="{% url 'lista_documentos' %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

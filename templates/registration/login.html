@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container" style="margin-top:50px; max-width:400px;">
+    <div class="card-custom p-4">
+        <h3 class="text-center mb-4">Login - Sala de Situação</h3>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Usuário</label>
+                {{ form.username }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Senha</label>
+                {{ form.password }}
+            </div>
+
+            <button class="btn btn-primary w-100">Entrar</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+/* Campos obrigatórios - asterisco */
+.required-label::after {
+    content: " *";
+    color: red;
+}
+
+/* Campo com erro */
+.is-invalid {
+    border: 1px solid #dc3545 !important;
+}
+
+/* Mensagem de erro */
+.error-text {
+    color: #dc3545;
+    font-size: 0.85rem;
+}

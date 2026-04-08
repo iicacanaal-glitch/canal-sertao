@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Nova Parada de Abastecimento</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Tipo de Parada</label>
+                {{ form.tipo }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Título</label>
+            {{ form.titulo }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            {{ form.motivo }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Data de início</label>
+                {{ form.data_inicio }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Data de fim</label>
+                {{ form.data_fim }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Municípios afetados</label>
+
+            <div class="row">
+                {% for checkbox in form.municipios_afetados %}
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            {{ checkbox.tag }}
+                            <label class="form-check-label">
+                                {{ checkbox.choice_label }}
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Responsável</label>
+            {{ form.responsavel }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Observações</label>
+            {{ form.observacoes }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{% url 'lista_paradas' %}" class="btn btn-secondary">Voltar</a>
+
+    </form>
+</div>
+{% endblock %}

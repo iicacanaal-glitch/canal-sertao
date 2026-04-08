@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Título -->
+    <div class="card-custom mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-1">🌱 Mapeamento de Solos</h3>
+                <small class="text-muted">
+                    Visualização dos tipos solo na área do canal
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="card-custom">
+        <div id="map" style="height: 75vh; border-radius: 10px;"></div>
+    </div>
+
+</div>
+
+<script>
+    const geojsonTrechos = "{% static 'geojson/canal_trechos.geojson' %}";
+    const geojsonSolos = "{% static 'geojson/solos.geojson' %}";
+</script>
+
+<script src="{% static 'js/mapa_solos.js' %}"></script>
+
+{% endblock %}

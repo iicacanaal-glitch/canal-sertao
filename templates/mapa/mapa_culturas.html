@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Título -->
+    <div class="card-custom mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-1">🌱 Mapeamento de Culturas</h3>
+                <small class="text-muted">
+                    Visualização do uso e cobertura do solo na área do canal
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="card-custom">
+        <div id="map" style="height: 75vh; border-radius: 10px;"></div>
+    </div>
+
+</div>
+
+<!-- =============================
+     GEOJSON URLs
+============================= -->
+<script>
+    const geojsonUso = "{% static 'geojson/uso_solo.geojson' %}";
+    const geojsonTrechos = "{% static 'geojson/canal_trechos.geojson' %}";
+</script>
+
+<!-- =============================
+     LEAFLET JS
+============================= -->
+<script src="{% static 'js/mapa_culturas.js' %}"></script>
+
+{% endblock %}

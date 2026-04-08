@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Paradas de Abastecimento</h2>
+
+    <a href="{% url 'nova_parada' %}" class="btn btn-primary mb-3">
+        Nova Parada
+    </a>
+
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Data início</th>
+            <th>Data fim</th>
+            <th>Status</th>
+            <th>Responsável</th>
+        </tr>
+
+        {% for parada in paradas %}
+        <tr>
+            <td>{{ parada.titulo }}</td>
+            <td>{{ parada.get_tipo_display }}</td>
+            <td>{{ parada.data_inicio }}</td>
+            <td>{{ parada.data_fim }}</td>
+            <td>{{ parada.get_status_display }}</td>
+            <td>{{ parada.responsavel }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/previsao_tempo.css' %}">
+{% block content %}
+<div class="container mt-4">
+
+    <h2>Previsão do Tempo</h2>
+
+    <!-- Seleção município -->
+    <form method="get" class="mb-4">
+        <label>Município</label>
+        <select name="municipio" class="form-control" onchange="this.form.submit()">
+            <option value="">Selecione...</option>
+            {% for m in municipios %}
+                <option value="{{ m.id }}" {% if m.id|stringformat:"s" == municipio_id %}selected{% endif %}>
+                    {{ m.nome }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if previsao_hoje %}
+        <h4>Previsão Hora a Hora (Hoje)</h4>
+
+        <div class="row">
+        {% for h in previsao_hoje %}
+        <div class="col-md-1">
+            <div class="card text-center shadow-sm mb-2">
+                <div class="card-body p-2">
+                    <small>{{ h.hora }}</small>
+                    <img src="https://openweathermap.org/img/wn/{{ h.icone }}.png">
+                    <div>{{ h.temp }}°C</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+
+    {% endif %}
+
+    <div class="row mt-4">
+
+        {% if grafico_temp %}
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ grafico_temp|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if grafico_chuva %}
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ grafico_chuva|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if grafico_acumulado %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                {{ grafico_acumulado|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+
+    </div>
+
+    <!-- Previsão 5 dias -->
+    {% if previsao_cards %}
+    <div class="row mb-4">
+        {% for p in previsao_cards %}
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5>{{ p.dia_semana }}</h5>
+                    <small>{{ p.data }}</small>
+                    <hr>
+                    <img src="https://openweathermap.org/img/wn/{{ p.icone }}@2x.png">
+                    <p>{{ p.descricao }}</p>
+                    <strong>{{ p.temp_max|floatformat:0 }}° / {{ p.temp_min|floatformat:0 }}°</strong>
+                    <br>
+                    <small>Chuva: {{ p.chuva|floatformat:0 }}%</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+    <!-- Mapa -->
+    <h3>Mapa Climático</h3>
+    <div id="map" style="height: 500px;"></div>
+
+</div>
+
+<script>
+    var dados_municipios = {{ dados_mapa|safe }};
+</script>
+
+<script src="{% static 'js/mapa_previsao.js' %}"></script>
+
+{% endblock %}
