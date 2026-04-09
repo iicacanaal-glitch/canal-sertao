@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.db.models import Q
 
-from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento
-from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm
+from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto
+from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm, ProjetoForm
 
 from datetime import datetime
 from collections import defaultdict
@@ -410,3 +410,32 @@ def mapa_solos(request):
 @login_required
 def mapa_culturas(request):
     return render(request, 'mapa/mapa_culturas.html')
+
+
+@login_required
+def lista_projetos(request):
+    projetos = Projeto.objects.all()
+
+    return render(request, 'projetos/lista.html', {
+        'projetos': projetos
+    })
+
+
+@login_required
+def cadastrar_projeto(request):
+    if request.user.grupo != 'segov':
+        messages.error(request, "Você não tem permissão para cadastrar Projetos!")
+        return redirect('home')
+    if request.method == 'POST':
+        form = ProjetoForm(request.POST)
+        if form.is_valid():
+            projeto = form.save(commit=False)
+            projeto.cadastrante = request.user
+            projeto.save()
+            return redirect('lista_projetos')
+    else:
+        form = ProjetoForm()
+
+    return render(request, 'projetos/form.html', {
+        'form': form
+    })

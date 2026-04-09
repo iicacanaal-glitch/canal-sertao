@@ -86,6 +86,7 @@ class Irrigantes(models.Model):
     potencia_bomba = models.DecimalField(max_digits=10, decimal_places=2, help_text="cv")
 
     dias_uso_por_semana = models.IntegerField()
+    horas_uso_por_dia = models.IntegerField(default=0)
 
     diametro_succao = models.DecimalField(max_digits=10, decimal_places=2)
     diametro_recalque = models.DecimalField(max_digits=10, decimal_places=2)
@@ -204,3 +205,51 @@ class Documento(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
+
+class Projeto(models.Model):
+    NOTA_CHOICES = [(i, i) for i in range(1, 6)]
+
+    nome = models.CharField(max_length=200)
+    descricao = models.TextField(blank=True, null=True)
+
+    determinacao_legal = models.IntegerField(choices=NOTA_CHOICES)
+    impacto_metas = models.IntegerField(choices=NOTA_CHOICES)
+    alinhamento = models.IntegerField(choices=NOTA_CHOICES)
+    situacao = models.IntegerField(choices=NOTA_CHOICES)
+    dispo_recurso = models.IntegerField(choices=NOTA_CHOICES)
+    complexidade = models.IntegerField(choices=NOTA_CHOICES)
+    custo = models.IntegerField(choices=NOTA_CHOICES)
+    prazo = models.IntegerField(choices=NOTA_CHOICES)
+    riscos = models.IntegerField(choices=NOTA_CHOICES)
+    tempo_resultado = models.IntegerField(choices=NOTA_CHOICES)
+
+    data_de_cadastro = models.DateTimeField(auto_now_add=True)
+    cadastrante = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    resultado = models.FloatField(blank=True, null=True)
+
+    def calcular_resultado(self):
+        return (
+            self.determinacao_legal * 8 +
+            self.impacto_metas * 7 +
+            self.alinhamento * 7 +
+            self.situacao * 5 +
+            self.dispo_recurso * 8 +
+            self.complexidade * -2 +
+            self.custo * -3 +
+            self.prazo * -1 +
+            self.riscos * -4 +
+            self.tempo_resultado * -2
+        )
+
+    def save(self, *args, **kwargs):
+        self.resultado = self.calcular_resultado()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-resultado']
+
+    def __str__(self):
+        return self.nome

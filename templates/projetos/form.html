@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="container mt-4">
+    <h2>Novo Projeto</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- ERROS GERAIS -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- ================= DADOS ================= -->
+        <h4 class="mt-4">Dados do Projeto</h4>
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label required-label">Nome</label>
+                {{ form.nome }}
+                <div class="error-text">{{ form.nome.errors }}</div>
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Descrição</label>
+                {{ form.descricao }}
+            </div>
+
+        </div>
+
+        <!-- ================= AVALIAÇÃO ================= -->
+        <h4 class="mt-4">Critérios (1 a 5)</h4>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="required-label">Determinação Legal</label>
+                {{ form.determinacao_legal }}
+                <div class="error-text">{{ form.determinacao_legal.errors }}</div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="required-label">Impacto nas Metas</label>
+                {{ form.impacto_metas }}
+                <div class="error-text">{{ form.impacto_metas.errors }}</div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="required-label">Alinhamento à Estratégia</label>
+                {{ form.alinhamento }}
+                <div class="error-text">{{ form.alinhamento.errors }}</div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label required-label">Situação da Implementação</label>
+                {{ form.situacao }}
+                <div class="error-text">{{ form.situacao.errors }}</div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="required-label">Disponibilidade de Recurso</label>
+                {{ form.dispo_recurso }}
+                <div class="error-text">{{ form.dispo_recurso.errors }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label>Complexidade</label>
+                {{ form.complexidade }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Custo</label>
+                {{ form.custo }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Prazo de Implementação</label>
+                {{ form.prazo }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Riscos</label>
+                {{ form.riscos }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label>Tempo de Geração de Resultados</label>
+                {{ form.tempo_resultado }}
+            </div>
+        </div>
+
+        <!-- ================= RESULTADO (🔥 NOVO) ================= -->
+        <div id="resultado-box" class="alert alert-info mt-4" style="display: none;">
+            <strong>Score do Projeto:</strong>
+            <span id="resultado-valor">0</span>
+        </div>
+
+        <!-- ================= AÇÕES ================= -->
+        <div class="mt-4">
+            <button class="btn btn-success">Salvar</button>
+            <a href="{% url 'lista_projetos' %}" class="btn btn-secondary">Voltar</a>
+        </div>
+
+    </form>
+</div>
+
+<script src="{% static 'js/form.js' %}"></script>
+
+{% endblock %}

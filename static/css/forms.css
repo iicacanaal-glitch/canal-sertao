@@ -14,3 +14,15 @@
     color: #dc3545;
     font-size: 0.85rem;
 }
+
+.nota-baixa {
+    border: 2px solid #dc3545 !important;
+}
+
+.nota-media {
+    border: 2px solid #ffc107 !important;
+}
+
+.nota-alta {
+    border: 2px solid #198754 !important;
+}

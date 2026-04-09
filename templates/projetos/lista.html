@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>Projetos</h2>
+    {% if request.user.grupo == 'segov' %}
+        <a href="{% url 'cadastrar_projeto' %}" class="btn btn-primary mb-3">
+            + Adicionar Projeto
+        </a>
+    {% endif %}
+
+    {% if projetos %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Resultado</th>
+                <th>Data</th>
+                <th>Cadastrante</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for projeto in projetos %}
+            <tr>
+                <td><strong>{{ forloop.counter }}</strong></td>
+                <td>{{ projeto.nome }}</td>
+                <td><strong>{{ projeto.resultado }}</strong></td>
+                <td>{{ projeto.data_de_cadastro|date:"d/m/Y" }}</td>
+                <td>{{ projeto.cadastrante }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <h6>Nenhum projeto foi cadastrado pela SEGOV até o momento.</h6>
+    {% endif %}
+
+</div>
+{% endblock %}

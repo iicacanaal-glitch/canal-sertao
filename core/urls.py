@@ -26,4 +26,7 @@ urlpatterns = [
     path('mapeamento/mapa-canal/', views.mapa_canal, name='mapa_canal'),
     path('mapeamento/mapa-solos/', views.mapa_solos, name='mapa_solos'),
     path('mapeamento/culturas/', views.mapa_culturas, name='mapa_culturas'),
+
+    path('projetos/', views.lista_projetos, name='lista_projetos'),
+    path('projetos/novo/', views.cadastrar_projeto, name='cadastrar_projeto'),
 ]

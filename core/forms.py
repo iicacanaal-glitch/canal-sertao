@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Parada, Municipio, Irrigantes, Documento, CategoriaDocumento
+from .models import Parada, Municipio, Irrigantes, Documento, CategoriaDocumento, Projeto
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -192,3 +192,58 @@ class DocumentoForm(forms.ModelForm):
                 raise forms.ValidationError("O arquivo deve ter no máximo 50MB.")
 
         return arquivo
+
+
+class ProjetoForm(forms.ModelForm):
+
+    class Meta:
+        model = Projeto
+        exclude = ['resultado', 'data_de_cadastro', 'cadastrante']
+
+        widgets = {
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome do projeto',
+                'required': True
+            }),
+
+            'descricao': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descreva o projeto'
+            }),
+
+            'determinacao_legal': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'impacto_metas': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'alinhamento': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'situacao': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'dispo_recurso': forms.Select(attrs={'class': 'form-select', 'required': True}),
+
+            'complexidade': forms.Select(attrs={'class': 'form-select'}),
+            'custo': forms.Select(attrs={'class': 'form-select'}),
+            'prazo': forms.Select(attrs={'class': 'form-select'}),
+            'riscos': forms.Select(attrs={'class': 'form-select'}),
+            'tempo_resultado': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        campos_obrigatorios = [
+            'determinacao_legal',
+            'impacto_metas',
+            'alinhamento',
+            'situacao',
+            'dispo_recurso',
+            'complexidade',
+            'custo',
+            'prazo',
+            'riscos',
+            'tempo_resultado'
+        ]
+
+        for campo in campos_obrigatorios:
+            if cleaned_data.get(campo) is None:
+                self.add_error(campo, "Este campo é obrigatório.")
+
+        return cleaned_data
