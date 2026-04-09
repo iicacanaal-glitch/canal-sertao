@@ -5,7 +5,13 @@
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 
 <div class="container mt-4">
-    <h2>Novo Projeto</h2>
+    <h2>
+        {% if editar %}
+            Editar Projeto
+        {% else %}
+            Novo Projeto
+        {% endif %}
+    </h2>
 
     <form method="post">
         {% csrf_token %}
@@ -106,7 +112,13 @@
 
         <!-- ================= AÇÕES ================= -->
         <div class="mt-4">
-            <button class="btn btn-success">Salvar</button>
+            <button class="btn btn-success">
+              {% if editar %}
+                  Atualizar
+              {% else %}
+                  Salvar
+              {% endif %}
+            </button>
             <a href="{% url 'lista_projetos' %}" class="btn btn-secondary">Voltar</a>
         </div>
 

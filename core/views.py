@@ -439,3 +439,37 @@ def cadastrar_projeto(request):
     return render(request, 'projetos/form.html', {
         'form': form
     })
+
+
+@login_required
+def editar_projeto(request, projeto_id):
+    if request.user.grupo != 'segov':
+        messages.error(request, "Você não tem permissão para cadastrar Projetos!")
+        return redirect('home')
+    projeto = get_object_or_404(Projeto, id=projeto_id)
+
+    if request.method == 'POST':
+        form = ProjetoForm(request.POST, instance=projeto)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_projetos')
+    else:
+        form = ProjetoForm(instance=projeto)
+
+    return render(request, 'projetos/form.html', {
+        'form': form,
+        'editar': True
+    })
+
+
+@login_required
+def excluir_projeto(request, projeto_id):
+    projeto = get_object_or_404(Projeto, id=projeto_id)
+
+    if request.method == 'POST':
+        projeto.delete()
+        return redirect('lista_projetos')
+
+    return render(request, 'projetos/confirmar_exclusao.html', {
+        'objeto': projeto
+    })

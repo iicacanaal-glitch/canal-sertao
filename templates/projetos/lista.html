@@ -19,6 +19,9 @@
                 <th>Resultado</th>
                 <th>Data</th>
                 <th>Cadastrante</th>
+                {% if request.user.grupo == 'segov' %}
+                    <th>Ações</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -29,6 +32,17 @@
                 <td><strong>{{ projeto.resultado }}</strong></td>
                 <td>{{ projeto.data_de_cadastro|date:"d/m/Y" }}</td>
                 <td>{{ projeto.cadastrante }}</td>
+                {% if request.user.grupo == 'segov' %}
+                    <td>
+                        <a href="{% url 'editar_projeto' projeto.id %}" class="btn btn-warning">
+                            Editar
+                        </a>
+
+                        <a href="{% url 'excluir_projeto' projeto.id %}" class="btn btn-danger">
+                            Excluir
+                        </a>
+                    </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
