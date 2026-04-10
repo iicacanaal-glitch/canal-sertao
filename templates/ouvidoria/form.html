@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="container mt-4">
+    <h2>Ouvidoria</h2>
+    <p>Envie sua manifestação (denúncia, reclamação, sugestão, etc.)</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ERROS GERAIS -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="row">
+
+            <!-- NOME -->
+            <div class="col-md-6 mb-3">
+                <label>Nome</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.nome.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ANÔNIMO -->
+            <div class="col-md-6 mb-3 d-flex align-items-center">
+                <div class="form-check mt-3">
+                    {{ form.anonimo }}
+                    <label class="form-check-label" for="id_anonimo">
+                        Enviar como anônimo
+                    </label>
+                </div>
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="col-md-6 mb-3">
+                <label>Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- TELEFONE -->
+            <div class="col-md-6 mb-3">
+                <label>Telefone</label>
+                {{ form.telefone }}
+                {% if form.telefone.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.telefone.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- TIPO -->
+            <div class="col-md-4 mb-3">
+                <label class="required-label">Tipo</label>
+                {{ form.tipo }}
+                {% if form.tipo.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.tipo.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ASSUNTO -->
+            <div class="col-md-8 mb-3">
+                <label class="required-label">Assunto</label>
+                {{ form.assunto }}
+                {% if form.assunto.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.assunto.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- DESCRIÇÃO -->
+            <div class="col-md-12 mb-3">
+                <label class="required-label">Descrição</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.descricao.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- MUNICÍPIO -->
+            <div class="col-md-6 mb-3">
+                <label>Município</label>
+                {{ form.municipio }}
+                {% if form.municipio.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.municipio.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ANEXO -->
+            <div class="col-md-6 mb-3">
+                <label>Anexo (máx. 10MB)</label>
+                {{ form.anexo }}
+                {% if form.anexo.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.anexo.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="mt-4">
+            <button class="btn btn-success">Enviar</button>
+            <a href="{% url 'consulta_manifestacao' %}" class="btn btn-secondary">
+                Consultar Protocolo
+            </a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

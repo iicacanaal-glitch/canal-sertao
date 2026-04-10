@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Manifestações</h2>
+
+    {% if manifestacoes %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Protocolo</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for m in manifestacoes %}
+                <tr>
+                    <td>{{ m.protocolo }}</td>
+                    <td>{{ m.get_tipo_display }}</td>
+                    <td>
+                        <span class="badge bg-{{ m.cor_status }}">
+                            {{ m.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ m.data_criacao|date:"d/m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'atualizar_status' m.id %}" class="btn btn-sm btn-primary">
+                            Atualizar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    {% else %}
+      <h6>Não há nenhuma manifestação a ser tratada no momento. </h6>
+    {% endif %}
+
+</div>
+
+{% endblock %}

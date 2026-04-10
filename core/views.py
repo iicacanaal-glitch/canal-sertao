@@ -5,12 +5,14 @@ import plotly.offline as opy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.contrib import messages
 from django.db.models import Q
+from django.utils import timezone
 
-from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto
-from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm, ProjetoForm
+from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto, Manifestacao, ManifestacaoHistorico
+from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm, ProjetoForm, ManifestacaoForm
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 
@@ -21,7 +23,20 @@ class CustomLoginView(LoginView):
 
 @login_required
 def home(request):
-    return render(request, 'home.html')
+
+    manifestacoes = Manifestacao.objects.all()
+    paradas = Parada.objects.order_by('-data_inicio')[:5]
+
+    context = {
+        'total_projetos': Projeto.objects.count(),
+        'total_manifestacoes': manifestacoes.count(),
+        'em_andamento': manifestacoes.filter(status='em_andamento').count(),
+        'recebido': manifestacoes.filter(status='recebido').count(),
+        'manifestacoes_recentes': manifestacoes[:5],
+        'paradas_recentes': paradas,
+    }
+
+    return render(request, 'home.html', context)
 
 
 @login_required
@@ -472,4 +487,150 @@ def excluir_projeto(request, projeto_id):
 
     return render(request, 'projetos/confirmar_exclusao.html', {
         'objeto': projeto
+    })
+
+
+def escolher_classificacao(request):
+    if request.method == 'POST':
+        classificacao = request.POST.get('classificacao')
+
+        request.session['classificacao'] = classificacao
+
+        return redirect('enviar_manifestacao')
+
+    return render(request, 'ouvidoria/classificacao.html')
+
+
+def enviar_manifestacao(request):
+    classificacao = request.session.get('classificacao')
+
+    if not classificacao:
+        return redirect('escolher_classificacao')
+
+    if request.method == 'POST':
+        form = ManifestacaoForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            manifestacao = form.save(commit=False)
+
+            manifestacao.classificacao = classificacao
+
+            if form.cleaned_data.get('anonimo'):
+                manifestacao.nome = "Anônimo"
+                manifestacao.email = None
+
+            if classificacao == 'agropecuaria':
+                manifestacao.setor_responsavel = 'SEAGRI'
+            elif classificacao == 'consumo_humano':
+                manifestacao.setor_responsavel = 'CASAL'
+            else:
+                manifestacao.setor_responsavel = 'CASAL'
+
+            manifestacao.save()
+
+            ManifestacaoHistorico.objects.create(
+                manifestacao=manifestacao,
+                status='recebido',
+                descricao='Manifestação registrada no sistema'
+            )
+
+            if 'classificacao' in request.session:
+                del request.session['classificacao']
+
+            messages.success(
+                request,
+                f"Manifestação enviada com sucesso! Protocolo: {manifestacao.protocolo}"
+            )
+
+            return redirect('acompanhar_manifestacao', protocolo=manifestacao.protocolo)
+
+        else:
+            messages.error(request, "Corrija os erros abaixo.")
+
+    else:
+        form = ManifestacaoForm()
+
+    return render(request, 'ouvidoria/form.html', {
+        'form': form,
+        'classificacao': classificacao
+    })
+
+
+def consulta_manifestacao(request):
+    if request.method == 'POST':
+        protocolo = request.POST.get('protocolo')
+
+        try:
+            manifestacao = Manifestacao.objects.get(protocolo=protocolo)
+            return redirect('acompanhar_manifestacao', protocolo=protocolo)
+        except Manifestacao.DoesNotExist:
+            messages.error(request, "Protocolo não encontrado.")
+
+    return render(request, 'ouvidoria/consulta.html')
+
+
+def acompanhar_manifestacao(request, protocolo):
+    manifestacao = get_object_or_404(Manifestacao, protocolo=protocolo)
+
+    historico = manifestacao.historico.all().order_by('data')
+
+    return render(request, 'ouvidoria/detalhe.html', {
+        'manifestacao': manifestacao,
+        'historico': historico
+    })
+
+
+@login_required
+def lista_manifestacoes(request):
+    user = request.user
+
+    limite = timezone.now() - timedelta(days=7)
+
+    if user.grupo == 'seagri':
+        manifestacoes = Manifestacao.objects.filter(setor_responsavel='SEAGRI')
+
+    elif user.grupo == 'casal':
+        manifestacoes = Manifestacao.objects.filter(setor_responsavel='CASAL')
+
+    else:
+        messages.error(request, "Você não tem permissão para acessar a ouvidoria!")
+        return redirect('home')
+
+    manifestacoes = manifestacoes.exclude(
+        status='concluido',
+        ultima_atualizacao__lt=limite
+    )
+
+    return render(request, 'ouvidoria/lista.html', {
+        'manifestacoes': manifestacoes
+    })
+
+
+@login_required
+def atualizar_status(request, pk):
+    manifestacao = get_object_or_404(Manifestacao, pk=pk)
+
+    if request.method == 'POST':
+        novo_status = request.POST.get('status')
+        descricao = request.POST.get('descricao')
+
+        # atualiza status
+        manifestacao.status = novo_status
+        manifestacao.save()
+
+        # salva histórico
+        ManifestacaoHistorico.objects.create(
+            manifestacao=manifestacao,
+            status=novo_status,
+            descricao=descricao,
+            usuario=request.user if request.user.is_authenticated else None
+        )
+
+        messages.success(request, "Status atualizado com sucesso.")
+
+        return redirect('lista_manifestacoes')
+
+    return render(request, 'ouvidoria/atualizar_status.html', {
+        'manifestacao': manifestacao,
+        'status_choices': Manifestacao.STATUS_CHOICES
     })

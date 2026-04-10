@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/classificacao.css' %}">
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h2>Fale Conosco</h2>
+        <p class="text-muted">
+            Escolha o tipo da sua manifestação para que possamos encaminhar corretamente
+        </p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row justify-content-center">
+
+            <!-- 🌱 Agropecuária -->
+            <div class="col-md-4 mb-4">
+                <button type="submit" name="classificacao" value="agropecuaria"
+                        class="card w-100 border-0 shadow h-100 text-center p-4 btn-hover">
+
+                    <div class="mb-3" style="font-size: 40px;">🌱</div>
+
+                    <h5 class="fw-bold">Agropecuária</h5>
+
+                    <p class="text-muted small">
+                        Demandas relacionadas ao uso da água para irrigação,
+                        produção agrícola e atividades rurais.
+                    </p>
+
+                </button>
+            </div>
+
+            <!-- 💧 Consumo Humano -->
+            <div class="col-md-4 mb-4">
+                <button type="submit" name="classificacao" value="consumo_humano"
+                        class="card w-100 border-0 shadow h-100 text-center p-4 btn-hover">
+
+                    <div class="mb-3" style="font-size: 40px;">💧</div>
+
+                    <h5 class="fw-bold">Consumo Humano</h5>
+
+                    <p class="text-muted small">
+                        Demandas relacionadas ao uso da água para o consumo humano.
+                    </p>
+
+                </button>
+            </div>
+
+            <!-- 📌 Outros -->
+            <div class="col-md-4 mb-4">
+                <button type="submit" name="classificacao" value="outros"
+                        class="card w-100 border-0 shadow h-100 text-center p-4 btn-hover">
+
+                    <div class="mb-3" style="font-size: 40px;">📌</div>
+
+                    <h5 class="fw-bold">Outros</h5>
+
+                    <p class="text-muted small">
+                        Demandas ou outras manifestações
+                        que não se enquadram nas categorias anteriores.
+                    </p>
+
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

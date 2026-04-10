@@ -81,3 +81,8 @@ class DefaultAdmin(admin.ModelAdmin):
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Municipio)
 admin.site.register(Parada)
+admin.site.register(Irrigantes)
+admin.site.register(CategoriaDocumento)
+admin.site.register(Documento)
+admin.site.register(Projeto)
+admin.site.register(Manifestacao)

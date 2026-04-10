@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/detalhe.css' %}">
+
+<div class="container mt-4">
+
+    <h2>Protocolo: {{ manifestacao.protocolo }}</h2>
+
+    <div class="card mb-3">
+        <div class="card-body">
+
+            <p><strong>Tipo:</strong> {{ manifestacao.get_tipo_display }}</p>
+            <p><strong>Assunto:</strong> {{ manifestacao.assunto }}</p>
+            <p><strong>Status:</strong>
+                <span class="badge bg-{{ manifestacao.cor_status }}">
+                    {{ manifestacao.get_status_display }}
+                </span>
+            </p>
+
+            <p><strong>Descrição:</strong><br>{{ manifestacao.descricao }}</p>
+
+        </div>
+    </div>
+
+    <h4>Andamento</h4>
+
+    <div class="timeline">
+        {% for item in historico %}
+        <div class="timeline-item">
+            <div class="timeline-date">
+                {{ item.data|date:"d/m/Y H:i" }}
+            </div>
+            <strong>{{ item.get_status_display }}</strong>
+            <p>{{ item.descricao }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

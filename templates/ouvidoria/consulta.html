@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Consultar Manifestação</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Digite seu protocolo</label>
+            <input type="text" name="protocolo" class="form-control" placeholder="Ex: A1B2C3D4">
+        </div>
+
+        <button class="btn btn-primary">Consultar</button>
+    </form>
+
+</div>
+
+{% endblock %}

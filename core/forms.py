@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Parada, Municipio, Irrigantes, Documento, CategoriaDocumento, Projeto
+from .models import Parada, Municipio, Irrigantes, Documento, CategoriaDocumento, Projeto, Manifestacao
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -247,3 +247,91 @@ class ProjetoForm(forms.ModelForm):
                 self.add_error(campo, "Este campo é obrigatório.")
 
         return cleaned_data
+
+
+class ManifestacaoForm(forms.ModelForm):
+
+    class Meta:
+        model = Manifestacao
+        fields = [
+            'nome',
+            'email',
+            'telefone',
+            'anonimo',
+            'tipo',
+            'assunto',
+            'descricao',
+            'municipio',
+            'anexo',
+        ]
+
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'telefone': forms.TextInput(attrs={'class': 'form-control'}),
+            'anonimo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'tipo': forms.Select(attrs={'class': 'form-select'}),
+            'assunto': forms.TextInput(attrs={'class': 'form-control'}),
+            'descricao': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4
+            }),
+            'municipio': forms.TextInput(attrs={'class': 'form-control'}),
+            'anexo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+        labels = {
+            'nome': 'Nome',
+            'email': 'Email',
+            'telefone': 'Telefone',
+            'anonimo': 'Enviar como anônimo',
+            'tipo': 'Tipo de manifestação',
+            'assunto': 'Assunto',
+            'descricao': 'Descrição',
+            'municipio': 'Município',
+            'anexo': 'Anexo',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            else:
+                field.widget.attrs['class'] = 'form-control'
+
+        # aplica erro visual
+        if self.errors:
+            for field_name in self.errors:
+                self.fields[field_name].widget.attrs['class'] += ' is-invalid'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        anonimo = cleaned_data.get('anonimo')
+        nome = cleaned_data.get('nome')
+
+        # Se NÃO for anônimo, exige nome
+        if not anonimo and not nome:
+            self.add_error('nome', 'Informe o nome ou marque como anônimo.')
+
+        return cleaned_data
+
+    def clean_anexo(self):
+        anexo = self.cleaned_data.get('anexo')
+
+        if anexo:
+            limite = 10 * 1024 * 1024
+
+            if anexo.size > limite:
+                raise forms.ValidationError("Máximo de 10 MB.")
+
+            extensoes_permitidas = ['.jpg', '.png']
+            import os
+
+            ext = os.path.splitext(anexo.name)[1].lower()
+
+            if ext not in extensoes_permitidas:
+                raise forms.ValidationError("Tipo de arquivo não permitido.")
+
+        return anexo

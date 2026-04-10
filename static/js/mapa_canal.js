@@ -3,6 +3,16 @@ var map = L.map('map', {
     zoom: 9
 });
 
+const dadosTrechos = {
+    "Trecho 1": { extensao: "45 km", percentual: "100%" },
+    "Trecho 2": { extensao: "19,7 km", percentual: "100%" },
+    "Trecho 3": { extensao: "28,23 km", percentual: "100%" },
+    "Trecho 4": { extensao: "30,47 km", percentual: "100%" },
+    "Trecho 5": { extensao: "26,60 km", percentual: "5,64%" },
+    "Trecho restante": { extensao: "100 km", percentual: "0%" }
+};
+
+
 // ===== PANES (controle de profundidade) =====
 map.createPane('municipiosPane');
 map.getPane('municipiosPane').style.zIndex = 400;
@@ -43,7 +53,19 @@ fetch(geojsonUrl)
                 }
             });
 
-            layer.bindPopup("<b>" + nome + "</b>");
+            let info = dadosTrechos[nome];
+
+            let popupContent = `<b>${nome}</b>`;
+
+            if (info) {
+                popupContent += `
+                    <br><strong>Extensão:</strong> ${info.extensao}
+                    <br><strong>Executado:</strong> ${info.percentual}
+                `;
+            }
+
+            layer.bindPopup(popupContent);
+
 
             listaCamadas.push({
                 nome: nome,

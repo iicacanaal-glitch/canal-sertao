@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+import uuid
 
 
 # ---------------------
@@ -253,3 +254,130 @@ class Projeto(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Manifestacao(models.Model):
+    TIPO_CHOICES = [
+        ('denuncia', 'Denúncia'), #CASAL
+        ('reclamacao', 'Reclamação'), #SEAGRI
+        ('solicitacao', 'Solicitação'), #CASAL
+        ('sugestao', 'Sugestão'), #SEAGRI
+        ('elogio', 'Elogio'), #NÃO LEMBRO DE VER ALGUÉM ELOGIAR
+    ]
+
+    STATUS_CHOICES = [
+        ('recebido', 'Recebido'),
+        ('em_analise', 'Em análise'),
+        ('encaminhado', 'Encaminhado'),
+        ('em_andamento', 'Em andamento'),
+        ('concluido', 'Concluído'),
+    ]
+    CLASSIFICACAO_CHOICES = [
+        ('agropecuaria', 'Agropecuária'),
+        ('consumo_humano', 'Consumo Humano'),
+        ('outros', 'Outros'),
+    ]
+
+    nome = models.CharField(max_length=200, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+
+    anonimo = models.BooleanField(default=False)
+    classificacao = models.CharField(max_length=20, choices=CLASSIFICACAO_CHOICES, blank=True, null=True)
+
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    assunto = models.CharField(max_length=200)
+    descricao = models.TextField()
+
+    municipio = models.CharField(max_length=150, blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+    setor_responsavel = models.CharField(max_length=200, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='recebido'
+    )
+
+    anexo = models.FileField(
+        upload_to='ouvidoria/',
+        blank=True,
+        null=True
+    )
+
+    protocolo = models.CharField(max_length=20, unique=True)
+
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    ultima_atualizacao = models.DateTimeField(auto_now=True)
+
+    def gerar_protocolo(self):
+        return str(uuid.uuid4())[:8].upper()
+
+    def definir_setor(self):
+        if self.classificacao == 'agropecuaria':
+            return 'SEAGRI'
+        elif self.classificacao in ['consumo_humano', 'outros']:
+            return 'CASAL'
+
+        return 'CASAL'
+
+    def save(self, *args, **kwargs):
+
+        if not self.protocolo:
+            self.protocolo = self.gerar_protocolo()
+
+        if not self.setor_responsavel:
+            self.setor_responsavel = self.definir_setor()
+
+        super().save(*args, **kwargs)
+
+    def status_display(self):
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
+
+    def cor_status(self):
+        cores = {
+            'recebido': 'secondary',
+            'em_analise': 'info',
+            'encaminhado': 'primary',
+            'em_andamento': 'warning',
+            'concluido': 'success',
+            'indeferido': 'danger',
+        }
+        return cores.get(self.status, 'secondary')
+
+    class Meta:
+        ordering = ['-data_criacao']
+        verbose_name = "Manifestação"
+        verbose_name_plural = "Manifestações"
+
+    def __str__(self):
+        return f"{self.protocolo} - {self.assunto}"
+
+
+class ManifestacaoHistorico(models.Model):
+
+    manifestacao = models.ForeignKey(
+        Manifestacao,
+        on_delete=models.CASCADE,
+        related_name='historico'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Manifestacao.STATUS_CHOICES
+    )
+
+    descricao = models.TextField(blank=True, null=True)
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    data = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.manifestacao.protocolo} - {self.status}"

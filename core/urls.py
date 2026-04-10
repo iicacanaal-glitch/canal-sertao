@@ -31,4 +31,14 @@ urlpatterns = [
     path('projetos/novo/', views.cadastrar_projeto, name='cadastrar_projeto'),
     path('projetos/<int:projeto_id>/editar/', views.editar_projeto, name='editar_projeto'),
     path('projetos/<int:projeto_id>/excluir/', views.excluir_projeto, name='excluir_projeto'),
+
+    # interno
+    path('ouvidoria/lista/', views.lista_manifestacoes, name='lista_manifestacoes'),
+    path('ouvidoria/<int:pk>/atualizar/', views.atualizar_status, name='atualizar_status'),
+
+    # público
+    path('fale-conosco/', views.escolher_classificacao, name='escolher_classificacao'),
+    path('ouvidoria/', views.enviar_manifestacao, name='enviar_manifestacao'),
+    path('ouvidoria/consulta/', views.consulta_manifestacao, name='consulta_manifestacao'),
+    path('ouvidoria/<str:protocolo>/', views.acompanhar_manifestacao, name='acompanhar_manifestacao'),
 ]
