@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/detalhes.css' %}">
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalhes do Projeto</h2>
+
+        <a href="{% url 'lista_projetos' %}" class="btn btn-secondary">
+            ← Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <!-- CABEÇALHO -->
+            <div class="mb-4">
+                <h3>{{ projeto.nome }}</h3>
+                <p class="text-muted mb-0">
+                    Cadastrado por <strong>{{ projeto.cadastrante }}</strong>
+                    em {{ projeto.data_de_cadastro|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+
+            <hr>
+
+            <!-- DESCRIÇÃO -->
+            <div class="mb-4">
+                <h5>Descrição</h5>
+                <p>{{ projeto.descricao|linebreaks }}</p>
+            </div>
+
+            <!-- SCORE -->
+            <div class="alert alert-primary">
+                <h4 class="mb-0">
+                    Score do Projeto: <strong>{{ projeto.resultado }}</strong>
+                </h4>
+            </div>
+
+            <!-- CRITÉRIOS -->
+            <h5 class="mt-4 mb-3">Critérios de Priorização</h5>
+
+            <div class="row">
+                {% for criterio in criterios %}
+                <div class="col-md-4 mb-3">
+
+                    <strong>
+                        {{ criterio.nome }}
+                        <small class="text-muted">
+                            (Peso {{ criterio.peso }})
+                        </small>
+                    </strong>
+
+                    <br>
+
+                    Nota: {{ criterio.nota }}
+
+                    <br>
+
+                    <small class="text-primary fw-bold">
+                        Impacto no Score: {{ criterio.impacto }}
+                    </small>
+
+                </div>
+                {% endfor %}
+            </div>
+
+
+
+            {% if request.user == projeto.cadastrante %}
+            <hr>
+
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'editar_projeto' projeto.id %}" class="btn btn-warning">
+                    Editar Projeto
+                </a>
+
+                <a href="{% url 'excluir_projeto' projeto.id %}" class="btn btn-danger">
+                    Excluir Projeto
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

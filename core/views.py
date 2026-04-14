@@ -93,9 +93,12 @@ def novo_irrigante(request):
 @login_required
 def previsao_tempo(request):
     municipios = Municipio.objects.filter(ativo=True)
-
+    hoje = datetime.now().date()
     municipio_id = request.GET.get('municipio')
+    dia_selecionado = request.GET.get('dia')
     previsao_hoje = []
+    primeiro_dia = None
+    municipio_selecionado = None
     dados_mapa = []
 
     api_key = "40fd160bb348bf3397a70f115255ea07"
@@ -110,6 +113,7 @@ def previsao_tempo(request):
                 data = response.json()
 
                 dados_mapa.append({
+                    'id': m.id,
                     'nome': m.nome,
                     'lat': m.latitude,
                     'lon': m.longitude,
@@ -130,6 +134,7 @@ def previsao_tempo(request):
     # ===== PREVISÃO MUNICÍPIO SELECIONADO =====
     if municipio_id:
         municipio = Municipio.objects.get(id=municipio_id)
+        municipio_selecionado = municipio
 
         url = f"https://api.openweathermap.org/data/2.5/forecast?lat={municipio.latitude}&lon={municipio.longitude}&appid={api_key}&units=metric&lang=pt_br"
         response = requests.get(url)
@@ -174,6 +179,7 @@ def previsao_tempo(request):
 
                 previsao_cards.append({
                     'data': dia.strftime("%d/%m"),
+                    'data_iso': dia.strftime("%Y-%m-%d"),
                     'dia_semana': dia_semana_pt,
                     'temp_min': min(temps),
                     'temp_max': max(temps),
@@ -182,7 +188,7 @@ def previsao_tempo(request):
                     'descricao': valores[0]['descricao'],
                 })
 
-            hoje = datetime.now().date()
+
 
             horas = []
             temperaturas = []
@@ -191,11 +197,24 @@ def previsao_tempo(request):
 
             acumulado = 0
 
+            primeiro_dia_disponivel = datetime.strptime(
+                data['list'][0]['dt_txt'],
+                "%Y-%m-%d %H:%M:%S"
+            ).date()
+
+            if dia_selecionado:
+                primeiro_dia = datetime.strptime(dia_selecionado, "%Y-%m-%d").date()
+            else:
+                primeiro_dia = primeiro_dia_disponivel
+
+
             for item in data['list']:
                 data_hora = datetime.strptime(item['dt_txt'], "%Y-%m-%d %H:%M:%S")
 
-                if data_hora.date() == hoje:
-                    hora = data_hora.strftime("%H:%M")
+                if data_hora.date() == primeiro_dia:
+
+                    hora = data_hora.strftime("%Hh")
+
                     temp = item['main']['temp']
                     prob_chuva = item.get('pop', 0) * 100
                     descricao = item['weather'][0]['description']
@@ -235,7 +254,8 @@ def previsao_tempo(request):
                 xaxis_title='Hora',
                 yaxis_title='Temperatura (°C)',
                 template='plotly_white',
-                height=350
+                height=350,
+                yaxis=dict(range=[0, max(temperaturas) * 1.15])
             )
 
             grafico_temp = opy.plot(fig_temp, auto_open=False, output_type='div')
@@ -245,7 +265,7 @@ def previsao_tempo(request):
 
             fig_chuva.add_trace(go.Bar(
                 x=horas,
-                y=chuva,
+                y=chuvas,
                 name='Probabilidade de Chuva'
             ))
 
@@ -254,7 +274,8 @@ def previsao_tempo(request):
                 xaxis_title='Hora',
                 yaxis_title='%',
                 template='plotly_white',
-                height=350
+                height=350,
+                yaxis=dict(range=[0, 100])
             )
 
             grafico_chuva = opy.plot(fig_chuva, auto_open=False, output_type='div')
@@ -267,9 +288,10 @@ def previsao_tempo(request):
                 y=chuva_acumulada,
                 mode='lines+markers',
                 name='Chuva acumulada',
-                line=dict(width=3, color='blue'),
-                fill='tozeroy'
+                line=dict(width=3, color='blue')
             ))
+
+            max_y = max(chuva_acumulada) if max(chuva_acumulada) > 0 else 1
 
             fig_acum.update_layout(
                 title='Chuva Acumulada (mm)',
@@ -279,19 +301,31 @@ def previsao_tempo(request):
                 height=350
             )
 
-            grafico_acumulado = opy.plot(fig_acum, auto_open=False, output_type='div')
+            fig_acum.update_yaxes(
+                autorange=False,
+                range=[0, max_y * 1.15],
+                fixedrange=True
+            )
+
+            grafico_acumulado = opy.plot(
+                fig_acum,
+                auto_open=False,
+                output_type='div'
+            )
+
 
 
     context = {
         'municipios': municipios,
         'previsao_hoje': previsao_hoje,
+        'dia_selecionado': primeiro_dia,
         'dados_mapa': dados_mapa,
         'municipio_id': municipio_id,
         'grafico_temp': grafico_temp,
         'grafico_chuva': grafico_chuva,
         'grafico_acumulado': grafico_acumulado,
         'previsao_cards': previsao_cards,
-        'previsao_cards': previsao_cards,
+        'municipio_selecionado': municipio_selecionado,
     }
 
     return render(request, 'clima/previsao_tempo.html', context)
@@ -457,11 +491,77 @@ def cadastrar_projeto(request):
 
 
 @login_required
+def detalhes_projeto(request, projeto_id):
+    projeto = get_object_or_404(Projeto, id=projeto_id)
+
+    criterios = [
+        {
+            'nome': 'Determinação Legal',
+            'nota': projeto.determinacao_legal,
+            'peso': 8,
+        },
+        {
+            'nome': 'Impacto nas Metas',
+            'nota': projeto.impacto_metas,
+            'peso': 7,
+        },
+        {
+            'nome': 'Alinhamento',
+            'nota': projeto.alinhamento,
+            'peso': 7,
+        },
+        {
+            'nome': 'Situação',
+            'nota': projeto.situacao,
+            'peso': 5,
+        },
+        {
+            'nome': 'Disponibilidade de Recurso',
+            'nota': projeto.dispo_recurso,
+            'peso': 8,
+        },
+        {
+            'nome': 'Complexidade',
+            'nota': projeto.complexidade,
+            'peso': -2,
+        },
+        {
+            'nome': 'Custo',
+            'nota': projeto.custo,
+            'peso': -3,
+        },
+        {
+            'nome': 'Prazo',
+            'nota': projeto.prazo,
+            'peso': -1,
+        },
+        {
+            'nome': 'Riscos',
+            'nota': projeto.riscos,
+            'peso': -4,
+        },
+        {
+            'nome': 'Tempo para Resultado',
+            'nota': projeto.tempo_resultado,
+            'peso': -2,
+        },
+    ]
+
+    for criterio in criterios:
+        criterio['impacto'] = criterio['nota'] * criterio['peso']
+
+    return render(request, 'projetos/detalhes.html', {
+        'projeto': projeto,
+        'criterios': criterios
+    })
+
+
+@login_required
 def editar_projeto(request, projeto_id):
-    if request.user.grupo != 'segov':
+    projeto = get_object_or_404(Projeto, id=projeto_id)
+    if request.user.grupo != projeto.cadastrante:
         messages.error(request, "Você não tem permissão para cadastrar Projetos!")
         return redirect('home')
-    projeto = get_object_or_404(Projeto, id=projeto_id)
 
     if request.method == 'POST':
         form = ProjetoForm(request.POST, instance=projeto)

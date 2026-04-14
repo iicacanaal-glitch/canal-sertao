@@ -28,6 +28,7 @@ urlpatterns = [
     path('mapeamento/culturas/', views.mapa_culturas, name='mapa_culturas'),
 
     path('projetos/', views.lista_projetos, name='lista_projetos'),
+    path('projetos/<int:projeto_id>/', views.detalhes_projeto, name='detalhes_projeto'),
     path('projetos/novo/', views.cadastrar_projeto, name='cadastrar_projeto'),
     path('projetos/<int:projeto_id>/editar/', views.editar_projeto, name='editar_projeto'),
     path('projetos/<int:projeto_id>/excluir/', views.excluir_projeto, name='excluir_projeto'),

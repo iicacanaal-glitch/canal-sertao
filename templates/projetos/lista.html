@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/lista.css' %}">
 <div class="container mt-4">
 
     <h2>Projetos</h2>
@@ -26,21 +27,26 @@
         </thead>
         <tbody>
             {% for projeto in projetos %}
-            <tr>
+            <tr class="linha-clicavel" onclick="window.location='{% url 'detalhes_projeto' projeto.id %}'">
+
                 <td><strong>{{ forloop.counter }}</strong></td>
                 <td>{{ projeto.nome }}</td>
                 <td><strong>{{ projeto.resultado }}</strong></td>
                 <td>{{ projeto.data_de_cadastro|date:"d/m/Y" }}</td>
                 <td>{{ projeto.cadastrante }}</td>
-                {% if request.user.grupo == 'segov' %}
+                {% if request.user == projeto.cadastrante %}
                     <td>
-                        <a href="{% url 'editar_projeto' projeto.id %}" class="btn btn-warning">
-                            Editar
-                        </a>
+                      <a href="{% url 'editar_projeto' projeto.id %}"
+                       class="btn btn-warning btn-sm"
+                       onclick="event.stopPropagation();">
+                        Editar
+                      </a>
 
-                        <a href="{% url 'excluir_projeto' projeto.id %}" class="btn btn-danger">
-                            Excluir
-                        </a>
+                      <a href="{% url 'excluir_projeto' projeto.id %}"
+                       class="btn btn-danger btn-sm"
+                       onclick="event.stopPropagation();">
+                        Excluir
+                      </a>
                     </td>
                 {% endif %}
             </tr>

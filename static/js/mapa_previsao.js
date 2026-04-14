@@ -12,9 +12,9 @@ map.getPane('canalPane').style.zIndex = 500;
 // =============================
 // 🗺️ BASE MAP
 // =============================
-var osm = L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    { attribution: '© OpenStreetMap' }
+var satelite = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { attribution: 'Tiles © Esri' }
 ).addTo(map);
 
 
@@ -86,46 +86,62 @@ fetch('/static/geojson/municipios.geojson')
 
             onEachFeature: function(feature, layer) {
 
-                let nome = feature.properties.nome || "";
+              let nome = feature.properties.nome || "";
 
-                // 🔥 encontrar dados do município vindos do Django
-                let dados = dados_municipios.find(m => m.nome === nome);
+              let dados = dados_municipios.find(m => m.nome === nome);
 
-                let popup = "<b>" + nome + "</b><br>";
+              let popup = "<b>" + nome + "</b><br>";
 
-                if (dados) {
-                    popup +=
-                        "🌡️ Temp: " + dados.temp + " °C<br>" +
-                        "☁️ " + dados.descricao;
-                } else {
-                    popup += "Sem dados";
-                }
+              if (dados) {
+                  popup +=
+                      "🌡️ Temp: " + Number(dados.temp).toFixed(1) + " °C<br>" +
+                      "☁️ " + dados.descricao;
+              } else {
+                  popup += "Sem dados";
+              }
 
-                layer.bindPopup(popup);
+              layer.bindPopup(popup);
 
-                // 🔥 HOVER
-                layer.on({
+              layer.on({
 
-                    mouseover: function(e) {
-                        let l = e.target;
+                  mouseover: function(e) {
+                      let l = e.target;
 
-                        l.setStyle({
-                            weight: 3,
-                            color: "#007bff"
-                        });
+                      l.setStyle({
+                          weight: 3,
+                          color: "#007bff",
+                          fillOpacity: 0.25
+                      });
 
-                        l.bindTooltip(nome, {
-                            direction: "center",
-                            className: "tooltip-municipio"
-                        }).openTooltip();
-                    },
+                      if (dados) {
+                          l.bindTooltip(
+                              `
+                              <strong>${nome}</strong><br>
+                              🌡️ ${Number(dados.temp).toFixed(1)} °C<br>
+                              ☁️ ${dados.descricao}
+                              `,
+                              {
+                                  direction: "top",
+                                  sticky: true,
+                                  className: "tooltip-municipio"
+                              }
+                          ).openTooltip();
+                      }
+                  },
 
-                    mouseout: function(e) {
-                        camadaMunicipios.resetStyle(e.target);
-                        e.target.closeTooltip();
-                    }
-                });
-            }
+                  mouseout: function(e) {
+                      camadaMunicipios.resetStyle(e.target);
+                      e.target.closeTooltip();
+                  },
+
+                  click: function() {
+                      if (dados) {
+                          window.location.href = `/previsao-tempo/?municipio=${dados.id}`;
+                      }
+                  }
+              });
+          }
+
         });
 
         camadaMunicipios.addTo(map);

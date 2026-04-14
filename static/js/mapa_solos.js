@@ -3,6 +3,15 @@ var map = L.map('map', {
     zoom: 9
 });
 
+const dadosTrechos = {
+    "Trecho 1": { extensao: "45 km", percentual: "100%" },
+    "Trecho 2": { extensao: "19,7 km", percentual: "100%" },
+    "Trecho 3": { extensao: "28,23 km", percentual: "100%" },
+    "Trecho 4": { extensao: "30,47 km", percentual: "100%" },
+    "Trecho 5": { extensao: "26,60 km", percentual: "5,64%" },
+    "Trecho restante": { extensao: "100 km", percentual: "0%" }
+};
+
 // =============================
 // 🧱 PANES (ordem das camadas)
 // =============================
@@ -130,48 +139,77 @@ fetch(geojsonSolos)
     });
 
 
-// =============================
-// 🚰 TRECHOS DO CANAL
-// =============================
-var listaTrechos = [];
-var trechosOrdenados = {};
+  // =============================
+  // 🚰 TRECHOS DO CANAL
+  // =============================
+  var listaTrechos = [];
+  var trechosOrdenados = {};
 
-fetch(geojsonTrechos)
-    .then(res => res.json())
-    .then(data => {
+  const coresTrechos = [
+      "#007bff",
+      "#28a745",
+      "#ffc107",
+      "#dc3545",
+      "#6f42c1",
+      "#17a2b8"
+  ];
 
-        data.features.forEach(function(feature) {
+  let indiceTrecho = 0;
 
-            var nome = feature.properties.Name || "Trecho";
+  function getCorTrecho() {
+      let cor = coresTrechos[indiceTrecho % coresTrechos.length];
+      indiceTrecho++;
+      return cor;
+  }
 
-            var layer = L.geoJSON(feature, {
-                pane: 'trechosPane',
-                style: {
-                    color: "#00ffff",
-                    weight: 4
-                }
-            });
+  fetch(geojsonTrechos)
+      .then(res => res.json())
+      .then(data => {
 
-            layer.bindPopup("<b>" + nome + "</b>");
+          data.features.forEach(function(feature) {
 
-            listaTrechos.push({
-                nome: nome,
-                layer: layer
-            });
+              var nome = feature.properties.Name || "Trecho";
 
-            layer.addTo(map);
-        });
+              let infoTrecho = dadosTrechos[nome] || {
+                  extensao: "Não informado",
+                  percentual: "Não informado"
+              };
 
-        listaTrechos.sort((a, b) =>
-            a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-        );
+              var layer = L.geoJSON(feature, {
+                  pane: 'trechosPane',
+                  style: {
+                      color: getCorTrecho(),
+                      weight: 4
+                  }
+              });
 
-        listaTrechos.forEach(item => {
-            trechosOrdenados["🚰 " + item.nome] = item.layer;
-        });
+              layer.bindPopup(`
+                  <div style="min-width:180px;">
+                      <h6 style="margin-bottom:8px;">🚰 ${nome}</h6>
+                      <b>Extensão:</b> ${infoTrecho.extensao}<br>
+                      <b>Executado:</b> ${infoTrecho.percentual}
+                  </div>
+              `);
 
-        criarControle();
-    });
+              listaTrechos.push({
+                  nome: nome,
+                  layer: layer
+              });
+
+              layer.addTo(map);
+          });
+
+          listaTrechos.sort((a, b) =>
+              a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+          );
+
+          listaTrechos.forEach(item => {
+              trechosOrdenados["🚰 " + item.nome] = item.layer;
+          });
+
+          criarControle();
+      });
+
 
 
 // =============================
