@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <h2>Ativos — Estruturas</h2>
+
+    <div id="map" style="height: 750px;"></div>
+
+</div>
+
+<script>
+    var geojsonCanal = "{% static 'geojson/canal_trechos.geojson' %}";
+    const geojsonUrl = "{% static 'geojson/canal_trechos.geojson' %}";
+    var geojsonEstruturas = "{% static 'geojson/estruturas.geojson' %}";
+    var geojsonEstruturasPonto = "{% static 'geojson/estruturas_pontos.geojson' %}";
+</script>
+
+<script src="{% static 'js/mapa_estruturas.js' %}"></script>
+{% endblock %}

@@ -42,4 +42,6 @@ urlpatterns = [
     path('ouvidoria/', views.enviar_manifestacao, name='enviar_manifestacao'),
     path('ouvidoria/consulta/', views.consulta_manifestacao, name='consulta_manifestacao'),
     path('ouvidoria/<str:protocolo>/', views.acompanhar_manifestacao, name='acompanhar_manifestacao'),
+
+    path('ativos/estruturas/', views.ativos_estruturas, name='ativos_estruturas'),
 ]

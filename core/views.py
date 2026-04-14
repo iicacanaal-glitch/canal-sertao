@@ -734,3 +734,8 @@ def atualizar_status(request, pk):
         'manifestacao': manifestacao,
         'status_choices': Manifestacao.STATUS_CHOICES
     })
+
+
+@login_required
+def ativos_estruturas(request):
+    return render(request, 'ativos/estruturas.html')
