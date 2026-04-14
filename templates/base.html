@@ -178,15 +178,15 @@
                     </ul>
                 </li>
 
-                {% if user.grupo == 'seagri' or user.grupo == 'casal' %}
-                    <!-- Ouvidoria -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="{% url 'lista_manifestacoes' %}">Ouvidoria</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'lista_manifestacoes' %}">Ouvidoria</a></li>
-                        </ul>
-                    </li>
-                {% endif %}
+
+                <!-- Ouvidoria -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="{% url 'lista_manifestacoes' %}">Ouvidoria</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'lista_manifestacoes' %}">Ouvidoria</a></li>
+                    </ul>
+                </li>
+
 
             </ul>
         </div>
