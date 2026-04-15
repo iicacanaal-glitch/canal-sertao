@@ -693,8 +693,9 @@ def lista_manifestacoes(request):
         manifestacoes = Manifestacao.objects.filter(setor_responsavel='CASAL')
 
     else:
-        messages.error(request, "Você não tem permissão para acessar a ouvidoria!")
-        return redirect('home')
+        manifestacoes = Manifestacao.objects.all()
+        #messages.error(request, "Você não tem permissão para acessar a ouvidoria!")
+        #return redirect('home')
 
     manifestacoes = manifestacoes.exclude(
         status='concluido',
