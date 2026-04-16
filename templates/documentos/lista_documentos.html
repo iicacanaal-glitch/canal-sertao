@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/lista.css' %}">
 <div class="container mt-4">
 
     <!-- HEADER -->
@@ -85,7 +86,7 @@
 
                 <tbody>
                     {% for doc in documentos %}
-                        <tr>
+                        <tr class="linha-clicavel" onclick="window.location='{% url 'detalhe_documento' doc.id %}'">
                             <td>
                                 <strong>{{ doc.titulo }}</strong><br>
                                 <small class="text-muted">
@@ -112,22 +113,21 @@
                             </td>
 
                             <td class="text-center">
+                              {% if request.user == doc.cadastrante %}
                                 {% if doc.arquivo %}
-                                    <a href="{% url 'detalhe_documento' doc.id %}" class="btn btn-sm btn-info">
-                                        Ver
-                                    </a>
-                                    <a href="{{ doc.arquivo.url }}" target="_blank" class="btn btn-sm btn-success">
+                                    <a href="{{ doc.arquivo.url }}" target="_blank" class="btn btn-sm btn-success" onclick="event.stopPropagation();">
                                         Download
                                     </a>
-                                    <a href="{% url 'editar_documento' doc.id %}" class="btn btn-sm btn-warning">
+                                    <a href="{% url 'editar_documento' doc.id %}" class="btn btn-sm btn-warning" onclick="event.stopPropagation();">
                                         Editar
                                     </a>
-                                    <a href="{% url 'excluir_documento' doc.id %}" class="btn btn-sm btn-danger">
+                                    <a href="{% url 'excluir_documento' doc.id %}" class="btn btn-sm btn-danger" onclick="event.stopPropagation();">
                                         Excluir
                                     </a>
                                 {% else %}
                                     <span class="text-muted">Sem arquivo</span>
                                 {% endif %}
+                              {% endif %}
                             </td>
                         </tr>
                     {% empty %}

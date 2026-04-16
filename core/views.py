@@ -49,6 +49,10 @@ def lista_paradas(request):
 
 @login_required
 def nova_parada(request):
+    if request.user.grupo not in ["seagri", "casal"]:
+        messages.error(request, "Você não tem permissão para cadastrar paradas!")
+        return redirect('home')
+
     if request.method == 'POST':
         form = ParadaForm(request.POST)
         if form.is_valid():
@@ -75,6 +79,10 @@ def lista_irrigantes(request):
 
 @login_required
 def novo_irrigante(request):
+    if request.user.grupo not in ["seagri", "casal"]:
+        messages.error(request, "Você não tem permissão para cadastrar novos irrigantes!")
+        return redirect('home')
+
     if request.method == 'POST':
         form = IrrigantesForm(request.POST, request.FILES)
         if form.is_valid():
@@ -339,14 +347,12 @@ def lista_documentos(request):
     documentos = Documento.objects.all().order_by('-data_upload')
     categorias = CategoriaDocumento.objects.filter(pai__isnull=True)
 
-    # 🔎 Filtro por busca
     if busca:
         documentos = documentos.filter(
             Q(titulo__icontains=busca) |
             Q(descricao__icontains=busca)
         )
 
-    # 📁 Filtro por categoria
     categoria_selecionada = None
     if categoria_id:
         categoria_selecionada = get_object_or_404(CategoriaDocumento, id=categoria_id)
@@ -431,6 +437,28 @@ def nova_categoria(request):
 
 
 @login_required
+def editar_categoria(request, pk):
+    categoria = get_object_or_404(CategoriaDocumento, pk=pk)
+
+    if request.method == 'POST':
+        form = CategoriaDocumentoForm(request.POST, instance=categoria)
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Categoria atualizada com sucesso!')
+            return redirect('documentos_por_categoria', categoria.id)
+
+    else:
+        form = CategoriaDocumentoForm(instance=categoria)
+
+    return render(request, 'documentos/editar_categoria.html', {
+        'form': form,
+        'categoria': categoria
+    })
+
+
+@login_required
 def documentos_por_categoria(request, categoria_id):
     categoria = get_object_or_404(CategoriaDocumento, id=categoria_id)
 
@@ -475,6 +503,7 @@ def cadastrar_projeto(request):
     if request.user.grupo != 'segov':
         messages.error(request, "Você não tem permissão para cadastrar Projetos!")
         return redirect('home')
+
     if request.method == 'POST':
         form = ProjetoForm(request.POST)
         if form.is_valid():
@@ -693,9 +722,8 @@ def lista_manifestacoes(request):
         manifestacoes = Manifestacao.objects.filter(setor_responsavel='CASAL')
 
     else:
-        manifestacoes = Manifestacao.objects.all()
-        #messages.error(request, "Você não tem permissão para acessar a ouvidoria!")
-        #return redirect('home')
+        messages.error(request, "Você não tem permissão para acessar a ouvidoria!")
+        return redirect('home')
 
     manifestacoes = manifestacoes.exclude(
         status='concluido',
@@ -709,6 +737,10 @@ def lista_manifestacoes(request):
 
 @login_required
 def atualizar_status(request, pk):
+    if request.user.grupo not in ["seagri", "casal"]:
+        messages.error(request, "Você não tem permissão para atualizar status de manifestações!")
+        return redirect('home')
+
     manifestacao = get_object_or_404(Manifestacao, pk=pk)
 
     if request.method == 'POST':
@@ -740,3 +772,8 @@ def atualizar_status(request, pk):
 @login_required
 def ativos_estruturas(request):
     return render(request, 'ativos/estruturas.html')
+
+
+@login_required
+def ods(request):
+    return render(request, 'informacoes/ods.html')

@@ -21,6 +21,7 @@ urlpatterns = [
     path('documentos/<int:documento_id>/excluir/', views.excluir_documento, name='excluir_documento'),
 
     path('categorias/nova/', views.nova_categoria, name='nova_categoria'),
+    path('categorias/<int:pk>/editar/', views.editar_categoria, name='editar_categoria'),
     path('categorias/<int:categoria_id>/', views.documentos_por_categoria, name='documentos_por_categoria'),
 
     path('mapeamento/mapa-canal/', views.mapa_canal, name='mapa_canal'),
@@ -44,4 +45,6 @@ urlpatterns = [
     path('ouvidoria/<str:protocolo>/', views.acompanhar_manifestacao, name='acompanhar_manifestacao'),
 
     path('ativos/estruturas/', views.ativos_estruturas, name='ativos_estruturas'),
+
+    path('informacoes/ods/', views.ods, name='ods'),
 ]
