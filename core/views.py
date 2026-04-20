@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto, Manifestacao, ManifestacaoHistorico
+from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto, Manifestacao, ManifestacaoHistorico, HistoricoObra
 from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm, ProjetoForm, ManifestacaoForm
 
 from datetime import datetime, timedelta
@@ -777,3 +777,12 @@ def ativos_estruturas(request):
 @login_required
 def ods(request):
     return render(request, 'informacoes/ods.html')
+
+
+@login_required
+def historico_obra(request):
+    eventos = HistoricoObra.objects.all()
+
+    return render(request, 'informacoes/historico_obra.html', {
+        'eventos': eventos
+    })

@@ -381,3 +381,24 @@ class ManifestacaoHistorico(models.Model):
 
     def __str__(self):
         return f"{self.manifestacao.protocolo} - {self.status}"
+
+
+class HistoricoObra(models.Model):
+    titulo = models.CharField(max_length=200)
+    data_evento = models.DateField()
+    descricao = models.TextField()
+    imagem = models.ImageField(
+        upload_to='historico_obra/',
+        blank=True,
+        null=True
+    )
+    ordem = models.PositiveIntegerField(
+        default=0,
+        help_text='Usado para ordenar manualmente se necessário'
+    )
+
+    class Meta:
+        ordering = ['data_evento', 'ordem']
+
+    def __str__(self):
+        return f"{self.data_evento} - {self.titulo}"

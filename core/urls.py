@@ -47,4 +47,5 @@ urlpatterns = [
     path('ativos/estruturas/', views.ativos_estruturas, name='ativos_estruturas'),
 
     path('informacoes/ods/', views.ods, name='ods'),
+    path('informacoes/historico-obra/', views.historico_obra, name='historico_obra'),
 ]

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/historico.css' %}">
+<div class="container mt-4">
+
+    <h2>Histórico da Obra</h2>
+    <p class="text-muted">
+        Linha do tempo dos principais marcos da implantação do Canal do Sertão.
+    </p>
+
+    <div class="timeline mt-4">
+
+        {% for evento in eventos %}
+        <div class="timeline-item card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h5>{{ evento.data_evento|date:"d/m/Y" }}</h5>
+                <h4>{{ evento.titulo }}</h4>
+
+                <p>{{ evento.descricao }}</p>
+
+                {% if evento.imagem %}
+                    <img src="{{ evento.imagem.url }}"
+                         class="img-fluid rounded mt-2"
+                         style="max-height:300px;">
+                {% endif %}
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endblock %}

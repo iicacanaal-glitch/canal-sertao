@@ -1,0 +1,8 @@
+.linha-clicavel {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.linha-clicavel:hover {
+    background-color: #f5f5f5;
+}
