@@ -9,8 +9,26 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Parada, Irrigantes, Municipio, Documento, CategoriaDocumento, Projeto, Manifestacao, ManifestacaoHistorico, HistoricoObra
-from .forms import LoginForm, ParadaForm, IrrigantesForm, DocumentoForm, CategoriaDocumentoForm, ProjetoForm, ManifestacaoForm
+from .models import (
+    Parada,
+    Irrigantes,
+    Municipio,
+    Documento,
+    CategoriaDocumento,
+    Projeto,
+    Manifestacao,
+    ManifestacaoHistorico,
+    HistoricoObra,
+)
+from .forms import (
+    LoginForm,
+    ParadaForm,
+    IrrigantesForm,
+    DocumentoForm,
+    CategoriaDocumentoForm,
+    ProjetoForm,
+    ManifestacaoForm,
+)
 
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -23,7 +41,6 @@ class CustomLoginView(LoginView):
 
 @login_required
 def home(request):
-
     manifestacoes = Manifestacao.objects.all()
     paradas = Parada.objects.order_by('-data_inicio')[:5]
 
@@ -101,17 +118,17 @@ def novo_irrigante(request):
 @login_required
 def previsao_tempo(request):
     municipios = Municipio.objects.filter(ativo=True)
-    hoje = datetime.now().date()
     municipio_id = request.GET.get('municipio')
     dia_selecionado = request.GET.get('dia')
     previsao_hoje = []
     primeiro_dia = None
+    titulo_previsao_dia = None
+    aviso_previsao_parcial = False
     municipio_selecionado = None
     dados_mapa = []
 
     api_key = "40fd160bb348bf3397a70f115255ea07"
 
-    # ===== DADOS DO MAPA =====
     for m in municipios:
         try:
             url = f"https://api.openweathermap.org/data/2.5/weather?lat={m.latitude}&lon={m.longitude}&appid={api_key}&units=metric&lang=pt_br"
@@ -119,7 +136,6 @@ def previsao_tempo(request):
 
             if response.status_code == 200:
                 data = response.json()
-
                 dados_mapa.append({
                     'id': m.id,
                     'nome': m.nome,
@@ -129,100 +145,113 @@ def previsao_tempo(request):
                     'descricao': data['weather'][0]['description'],
                     'icone': data['weather'][0]['icon'],
                 })
-        except:
+        except Exception:
             pass
 
-    # ===== VARIÁVEIS DOS GRÁFICOS =====
     grafico_temp = None
     grafico_chuva = None
     grafico_acumulado = None
-
     previsao_cards = []
 
-    # ===== PREVISÃO MUNICÍPIO SELECIONADO =====
     if municipio_id:
-        municipio = Municipio.objects.get(id=municipio_id)
-        municipio_selecionado = municipio
+        municipio = Municipio.objects.filter(id=municipio_id, ativo=True).first()
+        if not municipio:
+            messages.error(request, "Município inválido para consulta da previsão.")
+            return redirect('previsao_tempo')
 
+        municipio_selecionado = municipio
         url = f"https://api.openweathermap.org/data/2.5/forecast?lat={municipio.latitude}&lon={municipio.longitude}&appid={api_key}&units=metric&lang=pt_br"
         response = requests.get(url)
 
         if response.status_code == 200:
             data = response.json()
+            previsoes = data.get('list', [])
 
-            previsao_5dias = defaultdict(list)
-
-            for item in data['list']:
-                data_hora = datetime.strptime(item['dt_txt'], "%Y-%m-%d %H:%M:%S")
-                data_dia = data_hora.date()
-
-                temp = item['main']['temp']
-                prob_chuva = item.get('pop', 0) * 100
-                icone = item['weather'][0]['icon']
-                descricao = item['weather'][0]['description']
-
-                previsao_5dias[data_dia].append({
-                    'temp': temp,
-                    'chuva': prob_chuva,
-                    'icone': icone,
-                    'descricao': descricao
-                })
-
-            dias_semana = {
-                'Mon': 'Seg',
-                'Tue': 'Ter',
-                'Wed': 'Qua',
-                'Thu': 'Qui',
-                'Fri': 'Sex',
-                'Sat': 'Sáb',
-                'Sun': 'Dom',
-            }
-
-            for dia, valores in previsao_5dias.items():
-                temps = [v['temp'] for v in valores]
-                chuvas = [v['chuva'] for v in valores]
-
-                dia_semana_en = dia.strftime("%a")
-                dia_semana_pt = dias_semana[dia_semana_en]
-
-                previsao_cards.append({
-                    'data': dia.strftime("%d/%m"),
-                    'data_iso': dia.strftime("%Y-%m-%d"),
-                    'dia_semana': dia_semana_pt,
-                    'temp_min': min(temps),
-                    'temp_max': max(temps),
-                    'chuva': max(chuvas),
-                    'icone': valores[0]['icone'],
-                    'descricao': valores[0]['descricao'],
-                })
-
-
-
-            horas = []
-            temperaturas = []
-            chuva = []
-            chuva_acumulada = []
-
-            acumulado = 0
-
-            primeiro_dia_disponivel = datetime.strptime(
-                data['list'][0]['dt_txt'],
-                "%Y-%m-%d %H:%M:%S"
-            ).date()
-
-            if dia_selecionado:
-                primeiro_dia = datetime.strptime(dia_selecionado, "%Y-%m-%d").date()
+            if not previsoes:
+                messages.warning(request, "Não foi possível carregar a previsão detalhada para este município.")
             else:
-                primeiro_dia = primeiro_dia_disponivel
+                previsao_5dias = defaultdict(list)
 
+                for item in previsoes:
+                    data_hora = datetime.strptime(item['dt_txt'], "%Y-%m-%d %H:%M:%S")
+                    data_dia = data_hora.date()
+                    temp = item['main']['temp']
+                    prob_chuva = item.get('pop', 0) * 100
+                    icone = item['weather'][0]['icon']
+                    descricao = item['weather'][0]['description']
 
-            for item in data['list']:
-                data_hora = datetime.strptime(item['dt_txt'], "%Y-%m-%d %H:%M:%S")
+                    previsao_5dias[data_dia].append({
+                        'temp': temp,
+                        'chuva': prob_chuva,
+                        'icone': icone,
+                        'descricao': descricao
+                    })
 
-                if data_hora.date() == primeiro_dia:
+                dias_semana = {
+                    'Mon': 'Seg',
+                    'Tue': 'Ter',
+                    'Wed': 'Qua',
+                    'Thu': 'Qui',
+                    'Fri': 'Sex',
+                    'Sat': 'Sáb',
+                    'Sun': 'Dom',
+                }
+
+                for dia, valores in previsao_5dias.items():
+                    temps = [v['temp'] for v in valores]
+                    chuvas_dia = [v['chuva'] for v in valores]
+                    dia_semana_en = dia.strftime("%a")
+                    dia_semana_pt = dias_semana[dia_semana_en]
+
+                    previsao_cards.append({
+                        'data': dia.strftime("%d/%m"),
+                        'data_iso': dia.strftime("%Y-%m-%d"),
+                        'dia_semana': dia_semana_pt,
+                        'temp_min': min(temps),
+                        'temp_max': max(temps),
+                        'chuva': max(chuvas_dia),
+                        'icone': valores[0]['icone'],
+                        'descricao': valores[0]['descricao'],
+                    })
+
+                horas = []
+                temperaturas = []
+                chuva = []
+                chuva_acumulada = []
+                acumulado = 0
+
+                primeiro_dia_disponivel = datetime.strptime(
+                    previsoes[0]['dt_txt'],
+                    "%Y-%m-%d %H:%M:%S"
+                ).date()
+                primeiro_dia_completo = next(
+                    (dia for dia, valores in previsao_5dias.items() if len(valores) >= 8),
+                    primeiro_dia_disponivel
+                )
+
+                if dia_selecionado:
+                    try:
+                        primeiro_dia = datetime.strptime(dia_selecionado, "%Y-%m-%d").date()
+                    except ValueError:
+                        messages.warning(request, "Data inválida. Exibindo o primeiro dia disponível.")
+                        primeiro_dia = primeiro_dia_completo
+                else:
+                    primeiro_dia = primeiro_dia_completo
+
+                quantidade_periodos = len(previsao_5dias.get(primeiro_dia, []))
+                aviso_previsao_parcial = quantidade_periodos < 8
+                titulo_previsao_dia = (
+                    'Previsão restante do dia'
+                    if aviso_previsao_parcial
+                    else 'Previsão ao longo do dia'
+                )
+
+                for item in previsoes:
+                    data_hora = datetime.strptime(item['dt_txt'], "%Y-%m-%d %H:%M:%S")
+                    if data_hora.date() != primeiro_dia:
+                        continue
 
                     hora = data_hora.strftime("%Hh")
-
                     temp = item['main']['temp']
                     prob_chuva = item.get('pop', 0) * 100
                     descricao = item['weather'][0]['description']
@@ -230,7 +259,6 @@ def previsao_tempo(request):
                     chuva_mm = item.get('rain', {}).get('3h', 0)
 
                     acumulado += chuva_mm
-
                     horas.append(hora)
                     temperaturas.append(temp)
                     chuva.append(prob_chuva)
@@ -245,83 +273,69 @@ def previsao_tempo(request):
                         'chuva_mm': chuva_mm,
                     })
 
+                if not temperaturas:
+                    messages.info(request, "Não há dados horários para a data selecionada.")
+                else:
+                    fig_temp = go.Figure()
+                    fig_temp.add_trace(go.Scatter(
+                        x=horas,
+                        y=temperaturas,
+                        mode='lines+markers',
+                        name='Temperatura',
+                        line=dict(width=3)
+                    ))
+                    fig_temp.update_layout(
+                        title='Temperatura Hora a Hora',
+                        xaxis_title='Hora',
+                        yaxis_title='Temperatura (°C)',
+                        template='plotly_white',
+                        height=350,
+                        yaxis=dict(range=[0, max(temperaturas) * 1.15])
+                    )
+                    grafico_temp = opy.plot(fig_temp, auto_open=False, output_type='div')
 
-            # ===== GRÁFICO TEMPERATURA =====
-            fig_temp = go.Figure()
+                    fig_chuva = go.Figure()
+                    fig_chuva.add_trace(go.Bar(
+                        x=horas,
+                        y=chuva,
+                        name='Probabilidade de Chuva'
+                    ))
+                    fig_chuva.update_layout(
+                        title='Probabilidade de Chuva (%)',
+                        xaxis_title='Hora',
+                        yaxis_title='%',
+                        template='plotly_white',
+                        height=350,
+                        yaxis=dict(range=[0, 100])
+                    )
+                    grafico_chuva = opy.plot(fig_chuva, auto_open=False, output_type='div')
 
-            fig_temp.add_trace(go.Scatter(
-                x=horas,
-                y=temperaturas,
-                mode='lines+markers',
-                name='Temperatura',
-                line=dict(width=3)
-            ))
-
-            fig_temp.update_layout(
-                title='Temperatura Hora a Hora',
-                xaxis_title='Hora',
-                yaxis_title='Temperatura (°C)',
-                template='plotly_white',
-                height=350,
-                yaxis=dict(range=[0, max(temperaturas) * 1.15])
-            )
-
-            grafico_temp = opy.plot(fig_temp, auto_open=False, output_type='div')
-
-            # ===== GRÁFICO CHUVA =====
-            fig_chuva = go.Figure()
-
-            fig_chuva.add_trace(go.Bar(
-                x=horas,
-                y=chuvas,
-                name='Probabilidade de Chuva'
-            ))
-
-            fig_chuva.update_layout(
-                title='Probabilidade de Chuva (%)',
-                xaxis_title='Hora',
-                yaxis_title='%',
-                template='plotly_white',
-                height=350,
-                yaxis=dict(range=[0, 100])
-            )
-
-            grafico_chuva = opy.plot(fig_chuva, auto_open=False, output_type='div')
-
-            # ===== GRÁFICO CHUVA ACUMULADA =====
-            fig_acum = go.Figure()
-
-            fig_acum.add_trace(go.Scatter(
-                x=horas,
-                y=chuva_acumulada,
-                mode='lines+markers',
-                name='Chuva acumulada',
-                line=dict(width=3, color='blue')
-            ))
-
-            max_y = max(chuva_acumulada) if max(chuva_acumulada) > 0 else 1
-
-            fig_acum.update_layout(
-                title='Chuva Acumulada (mm)',
-                xaxis_title='Hora',
-                yaxis_title='mm',
-                template='plotly_white',
-                height=350
-            )
-
-            fig_acum.update_yaxes(
-                autorange=False,
-                range=[0, max_y * 1.15],
-                fixedrange=True
-            )
-
-            grafico_acumulado = opy.plot(
-                fig_acum,
-                auto_open=False,
-                output_type='div'
-            )
-
-
+                    fig_acum = go.Figure()
+                    fig_acum.add_trace(go.Scatter(
+                        x=horas,
+                        y=chuva_acumulada,
+                        mode='lines+markers',
+                        name='Chuva acumulada',
+                        line=dict(width=3, color='blue')
+                    ))
+                    max_y = max(chuva_acumulada) if max(chuva_acumulada) > 0 else 1
+                    fig_acum.update_layout(
+                        title='Chuva Acumulada (mm)',
+                        xaxis_title='Hora',
+                        yaxis_title='mm',
+                        template='plotly_white',
+                        height=350
+                    )
+                    fig_acum.update_yaxes(
+                        autorange=False,
+                        range=[0, max_y * 1.15],
+                        fixedrange=True
+                    )
+                    grafico_acumulado = opy.plot(
+                        fig_acum,
+                        auto_open=False,
+                        output_type='div'
+                    )
 
     context = {
         'municipios': municipios,
@@ -334,6 +348,8 @@ def previsao_tempo(request):
         'grafico_acumulado': grafico_acumulado,
         'previsao_cards': previsao_cards,
         'municipio_selecionado': municipio_selecionado,
+        'titulo_previsao_dia': titulo_previsao_dia,
+        'aviso_previsao_parcial': aviso_previsao_parcial,
     }
 
     return render(request, 'clima/previsao_tempo.html', context)
@@ -588,7 +604,7 @@ def detalhes_projeto(request, projeto_id):
 @login_required
 def editar_projeto(request, projeto_id):
     projeto = get_object_or_404(Projeto, id=projeto_id)
-    if request.user.grupo != projeto.cadastrante:
+    if request.user != projeto.cadastrante and not request.user.is_superuser:
         messages.error(request, "Você não tem permissão para cadastrar Projetos!")
         return redirect('home')
 
@@ -690,7 +706,7 @@ def consulta_manifestacao(request):
         protocolo = request.POST.get('protocolo')
 
         try:
-            manifestacao = Manifestacao.objects.get(protocolo=protocolo)
+            Manifestacao.objects.get(protocolo=protocolo)
             return redirect('acompanhar_manifestacao', protocolo=protocolo)
         except Manifestacao.DoesNotExist:
             messages.error(request, "Protocolo não encontrado.")
@@ -742,16 +758,19 @@ def atualizar_status(request, pk):
         return redirect('home')
 
     manifestacao = get_object_or_404(Manifestacao, pk=pk)
+    setor_esperado = request.user.grupo.upper()
+
+    if manifestacao.setor_responsavel != setor_esperado and not request.user.is_superuser:
+        messages.error(request, "Você não tem permissão para atualizar esta manifestação!")
+        return redirect('lista_manifestacoes')
 
     if request.method == 'POST':
         novo_status = request.POST.get('status')
         descricao = request.POST.get('descricao')
 
-        # atualiza status
         manifestacao.status = novo_status
         manifestacao.save()
 
-        # salva histórico
         ManifestacaoHistorico.objects.create(
             manifestacao=manifestacao,
             status=novo_status,

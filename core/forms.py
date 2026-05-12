@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from .models import Parada, Municipio, Irrigantes, Documento, CategoriaDocumento, Projeto, Manifestacao
 
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -30,17 +31,14 @@ class ParadaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields['municipios_afetados'].queryset = Municipio.objects.filter(ativo=True).order_by('nome')
 
 
 class IrrigantesForm(forms.ModelForm):
-
     class Meta:
         model = Irrigantes
         fields = '__all__'
         widgets = {
-            # Dados pessoais
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'apelido': forms.TextInput(attrs={'class': 'form-control'}),
             'cpf': forms.TextInput(attrs={'class': 'form-control'}),
@@ -48,63 +46,40 @@ class IrrigantesForm(forms.ModelForm):
             'estado_civil': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_mae': forms.TextInput(attrs={'class': 'form-control'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-
-            # Cônjuge
             'conjuge': forms.TextInput(attrs={'class': 'form-control'}),
             'cpf_conjuge': forms.TextInput(attrs={'class': 'form-control'}),
             'rg_conjuge': forms.TextInput(attrs={'class': 'form-control'}),
             'estado_civil_conjuge': forms.TextInput(attrs={'class': 'form-control'}),
-
-            # Contato
             'telefone': forms.TextInput(attrs={'class': 'form-control'}),
-
-            # Localização
             'municipio': forms.Select(attrs={'class': 'form-control'}),
             'latitude': forms.NumberInput(attrs={'class': 'form-control'}),
             'longitude': forms.NumberInput(attrs={'class': 'form-control'}),
-
-            # Imóvel
             'nome_imovel': forms.TextInput(attrs={'class': 'form-control'}),
             'comunidade': forms.TextInput(attrs={'class': 'form-control'}),
             'finalidade': forms.Textarea(attrs={'class': 'form-control'}),
-
-            # Área
             'area_total': forms.NumberInput(attrs={'class': 'form-control'}),
             'area_irrigada': forms.NumberInput(attrs={'class': 'form-control'}),
-
-            # Uso
             'forma_ocupacao': forms.TextInput(attrs={'class': 'form-control'}),
             'permissao_de_uso': forms.TextInput(attrs={'class': 'form-control'}),
             'num_permissao': forms.TextInput(attrs={'class': 'form-control'}),
-
             'uso_individual': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'uso_coletivo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'quant_coletivo': forms.NumberInput(attrs={'class': 'form-control'}),
-
-            # Captação
             'num_lacre': forms.TextInput(attrs={'class': 'form-control'}),
             'trecho_captacao': forms.TextInput(attrs={'class': 'form-control'}),
-
-            # Dados técnicos
             'vazao_requerida': forms.NumberInput(attrs={'class': 'form-control'}),
             'potencia_bomba': forms.NumberInput(attrs={'class': 'form-control'}),
             'dias_uso_por_semana': forms.NumberInput(attrs={'class': 'form-control'}),
-
             'diametro_succao': forms.NumberInput(attrs={'class': 'form-control'}),
             'diametro_recalque': forms.NumberInput(attrs={'class': 'form-control'}),
-
             'energia_utilizada': forms.TextInput(attrs={'class': 'form-control'}),
             'vazao_bombeamento': forms.NumberInput(attrs={'class': 'form-control'}),
             'distancia_captacao_destinacao': forms.NumberInput(attrs={'class': 'form-control'}),
             'destinacao_apos_captacao': forms.Textarea(attrs={'class': 'form-control'}),
-
-            # Reservatório
             'uso_direto': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'uso_reservatorio': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'vol_reservatorio': forms.NumberInput(attrs={'class': 'form-control'}),
             'altura_recalque': forms.NumberInput(attrs={'class': 'form-control'}),
-
-            # Arquivo
             'termo_autorizacao_semarh': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
@@ -138,7 +113,6 @@ class CategoriaDocumentoForm(forms.ModelForm):
     class Meta:
         model = CategoriaDocumento
         fields = ['nome', 'descricao']
-
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -161,23 +135,19 @@ class DocumentoForm(forms.ModelForm):
             'arquivo',
             'categoria',
         ]
-
         widgets = {
             'titulo': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Título do documento'
             }),
-
             'descricao': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Descrição (opcional)'
             }),
-
             'arquivo': forms.ClearableFileInput(attrs={
                 'class': 'form-control'
             }),
-
             'categoria': forms.Select(attrs={
                 'class': 'form-control'
             }),
@@ -186,39 +156,32 @@ class DocumentoForm(forms.ModelForm):
     def clean_arquivo(self):
         arquivo = self.cleaned_data.get('arquivo')
 
-        if arquivo:
-            # Limite de 50MB
-            if arquivo.size > 50 * 1024 * 1024:
-                raise forms.ValidationError("O arquivo deve ter no máximo 50MB.")
+        if arquivo and arquivo.size > 50 * 1024 * 1024:
+            raise forms.ValidationError("O arquivo deve ter no máximo 50MB.")
 
         return arquivo
 
 
 class ProjetoForm(forms.ModelForm):
-
     class Meta:
         model = Projeto
         exclude = ['resultado', 'data_de_cadastro', 'cadastrante']
-
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Nome do projeto',
                 'required': True
             }),
-
             'descricao': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Descreva o projeto'
             }),
-
             'determinacao_legal': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'impacto_metas': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'alinhamento': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'situacao': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'dispo_recurso': forms.Select(attrs={'class': 'form-select', 'required': True}),
-
             'complexidade': forms.Select(attrs={'class': 'form-select'}),
             'custo': forms.Select(attrs={'class': 'form-select'}),
             'prazo': forms.Select(attrs={'class': 'form-select'}),
@@ -250,7 +213,6 @@ class ProjetoForm(forms.ModelForm):
 
 
 class ManifestacaoForm(forms.ModelForm):
-
     class Meta:
         model = Manifestacao
         fields = [
@@ -264,7 +226,6 @@ class ManifestacaoForm(forms.ModelForm):
             'municipio',
             'anexo',
         ]
-
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -279,7 +240,6 @@ class ManifestacaoForm(forms.ModelForm):
             'municipio': forms.TextInput(attrs={'class': 'form-control'}),
             'anexo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
-
         labels = {
             'nome': 'Nome',
             'email': 'Email',
@@ -301,7 +261,6 @@ class ManifestacaoForm(forms.ModelForm):
             else:
                 field.widget.attrs['class'] = 'form-control'
 
-        # aplica erro visual
         if self.errors:
             for field_name in self.errors:
                 self.fields[field_name].widget.attrs['class'] += ' is-invalid'
@@ -311,7 +270,6 @@ class ManifestacaoForm(forms.ModelForm):
         anonimo = cleaned_data.get('anonimo')
         nome = cleaned_data.get('nome')
 
-        # Se NÃO for anônimo, exige nome
         if not anonimo and not nome:
             self.add_error('nome', 'Informe o nome ou marque como anônimo.')
 

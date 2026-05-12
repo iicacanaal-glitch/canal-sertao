@@ -20,7 +20,6 @@ class User(AbstractUser):
     grupo = models.CharField(max_length=50, choices=GRUPOS_CHOICES, blank=True, null=True)
     email = models.EmailField()
 
-    # Evita conflito de acessores reversos com auth.User.
     groups = models.ManyToManyField(Group, related_name="+", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="+", blank=True)
 
@@ -167,7 +166,6 @@ class Parada(models.Model):
         return f"{self.titulo} ({self.tipo})"
 
 
-#Arquivos e Documentos
 class CategoriaDocumento(models.Model):
     nome = models.CharField(max_length=255)
     pai = models.ForeignKey(
@@ -206,7 +204,6 @@ class Documento(models.Model):
 
     def __str__(self):
         return self.titulo
-
 
 
 class Projeto(models.Model):
@@ -258,11 +255,11 @@ class Projeto(models.Model):
 
 class Manifestacao(models.Model):
     TIPO_CHOICES = [
-        ('denuncia', 'Denúncia'), #CASAL
-        ('reclamacao', 'Reclamação'), #SEAGRI
-        ('solicitacao', 'Solicitação'), #CASAL
-        ('sugestao', 'Sugestão'), #SEAGRI
-        ('elogio', 'Elogio'), #NÃO LEMBRO DE VER ALGUÉM ELOGIAR
+        ('denuncia', 'Denúncia'),
+        ('reclamacao', 'Reclamação'),
+        ('solicitacao', 'Solicitação'),
+        ('sugestao', 'Sugestão'),
+        ('elogio', 'Elogio'),
     ]
 
     STATUS_CHOICES = [
@@ -323,7 +320,6 @@ class Manifestacao(models.Model):
         return 'CASAL'
 
     def save(self, *args, **kwargs):
-
         if not self.protocolo:
             self.protocolo = self.gerar_protocolo()
 
@@ -356,7 +352,6 @@ class Manifestacao(models.Model):
 
 
 class ManifestacaoHistorico(models.Model):
-
     manifestacao = models.ForeignKey(
         Manifestacao,
         on_delete=models.CASCADE,

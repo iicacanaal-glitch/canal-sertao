@@ -1,7 +1,9 @@
-from django.db.models import Count
-from .models import Manifestacao
-from django.utils import timezone
 from datetime import timedelta
+
+from django.db.models import Count
+from django.utils import timezone
+
+from .models import Manifestacao
 
 
 def contador_ouvidoria(request):
@@ -10,12 +12,10 @@ def contador_ouvidoria(request):
 
     user = request.user
 
-    if user.grupo =='seagri':
+    if user.grupo == 'seagri':
         qs = Manifestacao.objects.filter(setor_responsavel='SEAGRI')
-
     elif user.grupo == 'casal':
         qs = Manifestacao.objects.filter(setor_responsavel='CASAL')
-
     else:
         return {}
 
@@ -27,8 +27,6 @@ def contador_ouvidoria(request):
     )
 
     resumo = qs.values('status').annotate(total=Count('id'))
-
-    # transforma em dicionário
     resumo_dict = {item['status']: item['total'] for item in resumo}
 
     return {
